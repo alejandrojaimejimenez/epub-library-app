@@ -1,0 +1,29 @@
+{
+  "build": {
+    "development": {
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "buildType": "simulator"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "buildType": "archive"
+      }
+    }
+  },
+  "submit": {
+    "android": {
+      "serviceAccountKey": "./path/to/your/service-account.json"
+    },
+    "ios": {
+      "appleId": "your-apple-id",
+      "ascAppId": "your-app-store-connect-app-id"
+    }
+  }
+}
