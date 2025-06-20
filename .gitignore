@@ -1,0 +1,7 @@
+node_modules
+.expo
+.vscode
+.DS_Store
+.idea
+.env
+.git

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Servicio de frontend (React Native para web)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "19006:19006"
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
+    networks:
+      - epub-library-network
+
+  # Servicio de backend (API Node.js)
+  api:
+    build:
+      context: ../epub-library-api # Ruta al proyecto de la API (crear esto por separado)
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./books:/app/data/books
+      - ./db:/app/data/db
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - BOOKS_DIR=/app/data/books
+      - DB_PATH=/app/data/db/metadata.db
+    networks:
+      - epub-library-network
+
+networks:
+  epub-library-network:
+    driver: bridge

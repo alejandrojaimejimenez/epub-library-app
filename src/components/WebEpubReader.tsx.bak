@@ -1,0 +1,292 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Platform, Text } from 'react-native';
+// Importamos epubjs directamente (compatible con Webpack)
+import ePub from 'epubjs';
+import type { Book, Rendition, Location } from 'epubjs';
+
+interface WebEpubReaderProps {
+  url: string;
+  onLocationChange?: (location: string) => void;
+}
+
+const WebEpubReader: React.FC<WebEpubReaderProps> = ({ url, onLocationChange }) => {
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<Book | null>(null);
+  const renditionRef = useRef<Rendition | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const hasAttempedLoad = useRef<boolean>(false);
+  useEffect(() => {
+    if (!url || Platform.OS !== 'web') return;
+    
+    // Evitar cargas duplicadas
+    if (hasAttempedLoad.current && bookRef.current) return;
+    hasAttempedLoad.current = true;
+
+    console.log('URL del EPUB recibida:', url);
+    
+    // Función para cargar y renderizar el EPUB    const loadEpub = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Validar que la URL es válida
+        if (!url.startsWith('blob:') && !url.startsWith('http')) {
+          throw new Error('URL del EPUB no válida');
+        }
+        
+        console.log('Utilizando la importación directa de epubjs');
+        
+        try {
+          // Limpiar cualquier contenido previo
+          if (viewerRef.current) {
+            viewerRef.current.innerHTML = '';
+          }
+          
+          // Crear una nueva instancia del libro usando la importación directa
+          console.log('Iniciando carga del EPUB desde URL:', url);
+          const book = ePub(url);
+          bookRef.current = book;
+          
+          // Registrar evento para debug
+          book.on('openFailed', (error: any) => {
+            console.error('Error al abrir el EPUB:', error);
+            setError('Error al abrir el EPUB: ' + (error.message || 'Error desconocido'));
+            setIsLoading(false);
+          });
+          
+          // Esperar a que el libro esté listo
+          await book.ready;
+          console.log('Libro EPUB listo para renderizar');
+          
+          // Crear un nuevo rendition
+          if (!viewerRef.current) {
+            throw new Error('El contenedor de renderizado no está disponible');
+          }
+          
+          const rendition = book.renderTo(viewerRef.current, {
+            width: '100%',
+            height: '100%',
+            spread: 'auto',
+            flow: 'paginated'
+          });
+            
+          renditionRef.current = rendition;
+            
+            // Configurar eventos de localización
+            rendition.on('locationChanged', (location: Location) => {
+              if (onLocationChange) {
+                onLocationChange(location.start.cfi);
+              }
+            });
+            
+            // Mostrar la primera página
+            await rendition.display();
+            console.log('EPUB renderizado correctamente');
+            
+            setIsLoading(false);
+            setIsReady(true);
+          } catch (innerErr: any) {
+            console.error('Error en el proceso de renderizado:', innerErr);
+            setError('Error en el proceso de renderizado: ' + (innerErr.message || 'Error desconocido'));
+            setIsLoading(false);
+          }
+        }).catch((importErr: any) => {
+          console.error('Error al importar epubjs:', importErr);
+          setError('Error al importar epubjs: ' + (importErr.message || 'Error desconocido'));
+          setIsLoading(false);
+        });
+      } catch (err: any) {
+        console.error('Error al cargar el EPUB:', err);
+        setError('Error al cargar el EPUB: ' + (err.message || 'Error desconocido'));
+        setIsLoading(false);
+      }
+    };
+    
+    // Iniciar la carga del EPUB
+    loadEpub();
+    
+    // Limpieza al desmontar
+    return () => {
+      if (renditionRef.current) {
+        try {
+          renditionRef.current.destroy();
+        } catch (e) {
+          console.error('Error al destruir el rendition:', e);
+        }
+      }
+      
+      if (bookRef.current) {
+        try {
+          bookRef.current.destroy();
+        } catch (e) {
+          console.error('Error al destruir el libro:', e);
+        }
+      }
+    };
+  }, [url, onLocationChange]);
+
+  // Controles de navegación
+  const goNext = () => {
+    if (renditionRef.current) {
+      renditionRef.current.next();
+    }
+  };
+
+  const goPrevious = () => {
+    if (renditionRef.current) {
+      renditionRef.current.prev();
+    }
+  };
+
+  // Si no estamos en web, mostramos un mensaje
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={styles.container}>
+        <Text>El lector web de EPUB solo está disponible en la versión web.</Text>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Cargando EPUB...</Text>
+          <Text style={styles.debugText}>URL: {url ? url.substring(0, 30) + '...' : 'No disponible'}</Text>
+        </View>
+      )}
+      
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <button 
+            onClick={() => { hasAttempedLoad.current = false; window.location.reload(); }} 
+            style={styles.retryButton}
+          >
+            Reintentar
+          </button>
+        </View>
+      )}
+      
+      <div 
+        ref={viewerRef} 
+        style={{
+          width: '100%',
+          height: '90%',
+          backgroundColor: '#f9f9f9',
+          display: isLoading ? 'none' : 'block', // Ocultar mientras carga
+          border: '1px solid #ddd',
+          overflow: 'hidden',
+        }} 
+        data-testid="epub-viewer-container"
+      />
+      
+      {isReady && (
+        <View style={styles.navigationContainer}>
+          <button onClick={goPrevious} style={styles.navButton}>Anterior</button>
+          <Text style={styles.statusText}>Libro cargado correctamente</Text>
+          <button onClick={goNext} style={styles.navButton}>Siguiente</button>
+        </View>
+      )}
+      
+      {!isLoading && !isReady && !error && (
+        <View style={styles.waitingContainer}>
+          <Text style={styles.waitingText}>Preparando visualización...</Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    position: 'relative',
+  },
+  epubViewerWeb: {
+    width: '100%',
+    height: '90%',
+    backgroundColor: '#f9f9f9',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    zIndex: 10,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'center',
+  },
+  errorContainer: {
+    padding: 20,
+    backgroundColor: '#fee',
+    margin: 10,
+    borderRadius: 5,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 15,
+  },
+  retryButton: {
+    padding: 10,
+    backgroundColor: '#ff6b6b',
+    color: 'white',
+    borderRadius: 5,
+    cursor: 'pointer',
+    border: 'none',
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    height: '10%',
+    alignItems: 'center',
+  },
+  navButton: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    color: 'white',
+    borderRadius: 5,
+    cursor: 'pointer',
+    border: 'none',
+    margin: 5,
+  },
+  statusText: {
+    color: '#28a745',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  waitingContainer: {
+    padding: 20,
+    backgroundColor: '#fffde7',
+    margin: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  waitingText: {
+    color: '#ff9800',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+});
+
+export default WebEpubReader;
