@@ -23,10 +23,34 @@ const AppNavigator: React.FC = () => {
         header: () => <Header />,
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Library" component={LibraryScreen} />
-      <Stack.Screen name="BookDetail" component={BookDetailScreen} />
-      <Stack.Screen name="Reader" component={ReaderScreen} />
+      <Stack.Screen 
+        name="Home" 
+        component={HomeScreen}
+        options={{ 
+          title: 'Inicio' 
+        }}
+      />
+      <Stack.Screen 
+        name="Library" 
+        component={LibraryScreen} 
+        options={{ 
+          title: 'Biblioteca' 
+        }}
+      />
+      <Stack.Screen 
+        name="BookDetail" 
+        component={BookDetailScreen} 
+        options={{ 
+          title: 'Detalle del Libro'
+        }}
+      />
+      <Stack.Screen 
+        name="Reader" 
+        component={ReaderScreen} 
+        options={{ 
+          title: 'Lector'
+        }}
+      />
     </Stack.Navigator>
   );
 };
