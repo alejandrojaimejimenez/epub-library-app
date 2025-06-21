@@ -15,17 +15,49 @@ type ReaderScreenRouteProp = RouteProp<RootStackParamList, 'Reader'>;
 const ReaderScreen: React.FC = () => {
     const route = useRoute<ReaderScreenRouteProp>();
     const { bookId } = route.params;
-    const { getBookById, updateLastReadPosition } = useBooks();
+    const { getBookById, updateLastReadPosition, getBookReadPosition } = useBooks();
     
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);    const [currentCfi, setCurrentCfi] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        const fetchBook = async () => {
+    const [error, setError] = useState<Error | null>(null);
+    const [currentCfi, setCurrentCfi] = useState<string | undefined>(undefined);
+    const [savedCfi, setSavedCfi] = useState<string | undefined>(undefined);    useEffect(() => {
+        const fetchBookAndPosition = async () => {
             try {
+                // Obtener los datos del libro
                 const bookData = await getBookById(bookId);
-                setBook(bookData);
+                setBook(bookData);                // Obtener la posición de lectura específicamente desde el endpoint
+                // Pasamos los parámetros para identificar el usuario y dispositivo actuales
+                const readPosition = await getBookReadPosition(bookId, {
+                    format: 'EPUB',
+                    user: 'usuario1', // En una app real, esto vendría del contexto de autenticación
+                    device: Platform.OS === 'web' ? 'browser' : Platform.OS
+                });
+                
+                if (readPosition) {
+                    console.log(`Posición de lectura obtenida para el libro ${bookId}:`, readPosition);
+                    
+                    // Validar que el CFI tenga un formato básico válido antes de usarlo
+                    if (readPosition.cfi && typeof readPosition.cfi === 'string' && 
+                        readPosition.cfi.startsWith('epubcfi(') && readPosition.cfi.includes('/')) {
+                        console.log('CFI recuperado del servidor:', readPosition.cfi);
+                        setSavedCfi(readPosition.cfi);
+                    } else {
+                        console.warn('El CFI recibido no tiene un formato válido:', readPosition.cfi);
+                    }
+                    
+                    // También podemos guardar la posición porcentual si la necesitamos
+                    if (readPosition.pos_frac !== undefined && bookData) {
+                        const updatedBook = {
+                            ...bookData,
+                            lastReadPosition: readPosition.pos_frac,
+                            lastReadCfi: readPosition.cfi
+                        };
+                        setBook(updatedBook);
+                    }
+                } else {
+                    console.log(`No hay posición de lectura guardada para el libro ${bookId}, comenzando desde el inicio`);
+                }
             } catch (err) {
                 setError(err instanceof Error ? err : new Error(`Error al cargar el libro ${bookId}`));
             } finally {
@@ -33,16 +65,28 @@ const ReaderScreen: React.FC = () => {
             }
         };
 
-        fetchBook();
-    }, [bookId, getBookById]);    // Handler para cambios de posición en el lector
-    const handleLocationChange = (location: number, cfi?: string) => {
+        fetchBookAndPosition();
+    }, [bookId, getBookById, getBookReadPosition]);    const handleLocationChange = (location: number, cfi?: string) => {
         if (book) {
-            setCurrentCfi(cfi);
-            console.log(`Actualizando posición para libro ${book.id}: location=${location}, cfi=${cfi || 'no disponible'}`);
-            try {
-                updateLastReadPosition(book.id.toString(), location, cfi);
-            } catch (err) {
-                console.error('Error al actualizar posición:', err);
+            // Validar el CFI antes de usarlo
+            if (cfi && typeof cfi === 'string' && cfi.startsWith('epubcfi(') && cfi.includes('/')) {
+                setCurrentCfi(cfi);
+                console.log(`Actualizando posición para libro ${book.id}: location=${location}, cfi=${cfi}`);
+                try {
+                    // Pasar los parámetros para identificar el usuario y dispositivo actuales
+                    updateLastReadPosition(
+                        book.id.toString(), 
+                        location, 
+                        cfi,
+                        'EPUB',
+                        'usuario1', // En una app real, esto vendría del contexto de autenticación
+                        Platform.OS === 'web' ? 'browser' : Platform.OS
+                    );
+                } catch (err) {
+                    console.error('Error al actualizar posición:', err);
+                }
+            } else {
+                console.warn('CFI no válido, no se actualizará la posición:', cfi);
             }
         }
     };
@@ -87,6 +131,7 @@ const ReaderScreen: React.FC = () => {
             <EpubReader 
                 filePath={epubUri} 
                 onLocationChange={handleLocationChange}
+                initialCfi={savedCfi} // Pasar el CFI guardado como CFI inicial
             />
         </View>
     );

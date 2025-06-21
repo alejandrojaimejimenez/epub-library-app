@@ -13,11 +13,23 @@ export const API_ENDPOINTS = {
   GET_TAGS: `${API_BASE_URL}/tags`,
   GET_BOOKS_BY_AUTHOR: (author: string): string => `${API_BASE_URL}/books/author/${encodeURIComponent(author)}`,
   GET_BOOKS_BY_TAG: (tag: string): string => `${API_BASE_URL}/books/tag/${encodeURIComponent(tag)}`,
-  
-  // Búsqueda
+    // Búsqueda
   SEARCH_BOOKS: (query: string): string => `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`,
     // Posición de lectura
   UPDATE_READ_POSITION: (id: string): string => `${API_BASE_URL}/books/${id}/position`,
+  GET_READ_POSITION: (id: string, options?: { format?: string; user?: string; device?: string }): string => {
+    let url = `${API_BASE_URL}/books/${id}/position`;
+    if (options) {
+      const params = new URLSearchParams();
+      if (options.format) params.append('format', options.format);
+      if (options.user) params.append('user', options.user);
+      if (options.device) params.append('device', options.device);
+      
+      const paramString = params.toString();
+      if (paramString) url += `?${paramString}`;
+    }
+    return url;
+  },
   // Método alternativo usando POST para posición de lectura
   SAVE_READ_POSITION: (id: string): string => `${API_BASE_URL}/books/${id}/save-position`,
   

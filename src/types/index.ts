@@ -40,11 +40,11 @@ export interface Book {
   series?: Series;
   comments?: string;
   formats?: string[];
-  cover_path?: string;
-  // Campos adicionales para nuestra aplicación
+  cover_path?: string;  // Campos adicionales para nuestra aplicación
   coverImage?: string;
   filePath?: string;
   lastReadPosition?: number;
+  lastReadCfi?: string;
 }
 
 export interface ApiResponse<T> {

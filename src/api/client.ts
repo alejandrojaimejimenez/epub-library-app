@@ -152,6 +152,49 @@ export const updateReadPosition = async (
   }
 };
 
+export const getReadPosition = async (
+  id: string,
+  options?: {
+    format?: string;
+    user?: string;
+    device?: string;
+  }
+): Promise<{
+  id: number;
+  book: number;
+  format: string;
+  user: string;
+  device: string;
+  cfi: string;
+  epoch: number;
+  pos_frac: number;
+} | null> => {
+  try {
+    // Asegurar que siempre enviamos los parámetros predeterminados
+    const defaultOptions = {
+      format: 'EPUB',
+      user: 'usuario1',
+      device: 'browser',
+      ...options // Esto permitirá sobrescribir los valores predeterminados si se proporcionan otros
+    };
+    
+    console.log(`Obteniendo posición de lectura para el libro ${id}`, defaultOptions);
+    const response = await apiClient.get(API_ENDPOINTS.GET_READ_POSITION(id, defaultOptions));
+    
+    // Si la respuesta es exitosa pero data es null, significa que no hay posición guardada
+    if (response.data && response.data.success === true) {
+      console.log('Respuesta de posición de lectura:', response.data);
+      return response.data.data; // Puede ser null o un objeto con la posición
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error al obtener la posición de lectura:', error);
+    // No lanzamos el error para no interrumpir la experiencia de lectura
+    return null;
+  }
+};
+
 // Configurar interceptor global para manejar errores
 apiClient.interceptors.response.use(
   response => response,

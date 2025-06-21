@@ -13,7 +13,15 @@ interface UseBooksReturn {
     getBooksByTag: (tagName: string) => Promise<Book[]>;
     getAuthors: () => Promise<{id: string, name: string}[]>;
     getTags: () => Promise<{id: string, name: string}[]>;
-    updateLastReadPosition: (bookId: string, position: number, cfi?: string) => Promise<void>;
+    updateLastReadPosition: (
+        bookId: string, 
+        position: number, 
+        cfi?: string, 
+        format?: string,
+        user?: string,
+        device?: string
+    ) => Promise<void>;
+    getBookReadPosition: (bookId: string, options?: { format?: string; user?: string; device?: string; }) => Promise<any>;
 }
 
 const useBooks = (): UseBooksReturn => {
@@ -108,15 +116,35 @@ const useBooks = (): UseBooksReturn => {
     const updateLastReadPosition = useCallback(async (
         bookId: string, 
         position: number, 
-        cfi?: string
+        cfi?: string,
+        format: string = 'EPUB',
+        user: string = 'usuario1',
+        device: string = 'browser'
     ): Promise<void> => {
         try {
-            await API.updateReadPosition(bookId, position, cfi);
+            await API.updateReadPosition(bookId, position, cfi, format, user, device);
             // No se propaga ningún error para no interrumpir la experiencia de lectura
         } catch (err) {
             console.error('Error en updateLastReadPosition:', err);
             // No establecemos el error global para no mostrar mensajes al usuario
             // pero sí lo registramos para depuración
+        }
+    }, []);
+
+    // Función para obtener la posición de lectura guardada
+    const getBookReadPosition = useCallback(async (
+        bookId: string,
+        options?: {
+            format?: string;
+            user?: string;
+            device?: string;
+        }
+    ) => {
+        try {
+            return await API.getReadPosition(bookId, options);
+        } catch (err) {
+            console.error('Error al obtener posición de lectura:', err);
+            return null;
         }
     }, []);
 
@@ -130,7 +158,8 @@ const useBooks = (): UseBooksReturn => {
         getBooksByTag,
         getAuthors,
         getTags,
-        updateLastReadPosition
+        updateLastReadPosition,
+        getBookReadPosition
     };
 };
 

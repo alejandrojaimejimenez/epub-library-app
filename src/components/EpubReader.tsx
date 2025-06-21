@@ -7,9 +7,10 @@ import WebEpubReader from './WebEpubReader';
 interface EpubReaderProps {
     filePath: string;
     onLocationChange?: (location: number, cfi?: string) => void;
+    initialCfi?: string; // Nueva propiedad para la posición inicial
 }
 
-const EpubReader: React.FC<EpubReaderProps> = ({ filePath, onLocationChange }) => {
+const EpubReader: React.FC<EpubReaderProps> = ({ filePath, onLocationChange, initialCfi }) => {
     const { content, loading, error, loadEpub } = useEpubParser();
     const [currentLocation, setCurrentLocation] = useState<number>(0);
     const loadingRef = useRef<boolean>(false);
@@ -116,14 +117,14 @@ const EpubReader: React.FC<EpubReaderProps> = ({ filePath, onLocationChange }) =
     }    // Para versión web, usar el componente WebEpubReader cuando hay una URL disponible
     if (Platform.OS === 'web' && content.url) {
         console.log('Renderizando WebEpubReader con URL:', content.url);
-        
-        return (
+          return (
             <View style={[styles.container, {height: '100%'}]}>
                 <WebEpubReader 
                     url={content.url} 
                     blob={content.blob}
                     arrayBuffer={content.arrayBuffer}
                     onLocationChange={handleWebLocationChange}
+                    initialLocation={initialCfi}
                 />
             </View>
         );
