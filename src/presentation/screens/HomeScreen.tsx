@@ -38,7 +38,6 @@ const HomeScreen: React.FC = () => {  const navigation = useNavigation<any>();
   const navigateToLibrary = () => {
     navigation.navigate('Library');
   };
-
   if (loading) {
     return <Loading />;
   }
@@ -49,6 +48,31 @@ const HomeScreen: React.FC = () => {  const navigation = useNavigation<any>();
         <Text style={styles.errorText}>
           {error.message || 'Error al cargar los libros. Intente nuevamente.'}
         </Text>
+        
+        {/* Añadimos detalles de depuración */}
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugTitle}>Información de depuración:</Text>
+          <Text style={styles.debugText}>Error: {error.toString()}</Text>
+          <Text style={styles.debugText}>Libros cargados: {books.length}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Si no hay libros pero tampoco error, mostramos un mensaje informativo con depuración
+  if (books.length === 0) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          No hay libros disponibles en tu biblioteca.
+        </Text>
+        
+        <View style={styles.debugContainer}>
+          <Text style={styles.debugTitle}>Información de depuración:</Text>
+          <Text style={styles.debugText}>Estado de carga: {loading ? 'Cargando' : 'Completado'}</Text>
+          <Text style={styles.debugText}>Error: {error ? error : 'Ninguno'}</Text>
+          <Text style={styles.debugText}>Usuario: {user ? JSON.stringify(user) : 'No autenticado'}</Text>
+        </View>
       </View>
     );
   }
@@ -125,15 +149,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },  errorText: {
+  },  
+  errorText: {
     color: colors.error,
     textAlign: 'center',
     fontSize: 16,
+    marginBottom: 20,
   },
   logoutButton: {
     backgroundColor: 'transparent',
     paddingVertical: 0,
   },
+  // Estilos para la depuración
+  debugContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  debugTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  debugText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 5,
+  }
 });
 
 export default HomeScreen;

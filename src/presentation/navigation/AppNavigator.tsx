@@ -30,8 +30,11 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 // Navegador de pestañas
 const TabNavigator = () => {
+  console.log('🔄 Renderizando TabNavigator');
+  
   return (
     <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { 
@@ -76,11 +79,14 @@ const TabIcon = ({ name, color, size }: { name: string; color: string; size: num
 
 // Navegador principal
 const AppNavigator = () => {
+  console.log('🔄 Renderizando AppNavigator');
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName="TabNavigator"
     >
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name="BookDetail" component={BookDetailScreen} />

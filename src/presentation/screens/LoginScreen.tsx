@@ -11,19 +11,29 @@ const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error, clearError } = useAuth();
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  const handleLogin = async () => {
+  const navigation = useNavigation<LoginScreenNavigationProp>();  const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
       Alert.alert('Error', 'Por favor complete todos los campos');
       return;
     }
 
     try {
-      console.log('Intentando login con:', { username, password });
+      console.log('🔄 Iniciando proceso de login...');
+      console.log('📝 Datos de login:', { username, password: '****' });
+      
       await login({ username, password });
-      // La navegación se manejará en el componente AuthNavigator
+      
+      console.log('✅ Login exitoso');
+      // La navegación se manejará automáticamente en AuthNavigator
+      // cuando isAuthenticated cambie a true
+      
     } catch (err) {
-      console.error('Error al iniciar sesión:', err);
+      console.error('❌ Error en login:', err);
+      console.error('Detalles del error:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : String(err)
+      });
+      
       Alert.alert(
         'Error de autenticación', 
         `No se pudo iniciar sesión: ${err instanceof Error ? err.message : 'Error desconocido'}`

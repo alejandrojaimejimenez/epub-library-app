@@ -38,20 +38,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   // Comprueba si el usuario está autenticado al cargar la aplicación
   useEffect(() => {
     const loadUser = async () => {
+      console.log('🔄 Iniciando carga de datos de usuario');
       try {
         const storedToken = await getAuthToken();
+        console.log('📝 Token almacenado:', storedToken ? 'Encontrado' : 'No encontrado');
+        
         if (storedToken) {
+          console.log('🔑 Token válido, obteniendo datos de usuario');
           const userData = await getUserData();
+          console.log('👤 Datos de usuario:', userData);
           setUser(userData);
           setToken(storedToken);
+          console.log('✅ Usuario autenticado correctamente');
+        } else {
+          console.log('❌ No hay token almacenado, usuario no autenticado');
         }
       } catch (err) {
-        console.error('Error cargando datos de usuario:', err);
+        console.error('❌ Error cargando datos de usuario:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido al cargar usuario');
       } finally {
+        console.log('🏁 Finalizada la carga de datos de usuario');
         setIsLoading(false);
       }
     };

@@ -27,21 +27,32 @@ apiClient.interceptors.request.use(
   }
 );
 
-export class ApiClient {
-  static async get<T>(url: string, params?: Record<string, any>): Promise<T> {
+export class ApiClient {  static async get<T>(url: string, params?: Record<string, any>): Promise<T> {
     try {
+      console.log(`🌐 GET: ${url}`, params ? `Params: ${JSON.stringify(params)}` : '');
       const response = await apiClient.get<ApiResponse<T> | T>(url, { params });
+      console.log(`✅ GET response: ${url}`, response.status);
       return extractApiResponse<T>(response.data);
     } catch (error) {
+      console.error(`❌ GET error: ${url}`, error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`Status: ${error.response.status}`, error.response.data);
+      }
       throw handleApiError(error);
     }
   }
 
   static async post<T>(url: string, data: any): Promise<T> {
     try {
+      console.log(`🌐 POST: ${url}`, data ? `Data: ${JSON.stringify(data)}` : '');
       const response = await apiClient.post<ApiResponse<T> | T>(url, data);
+      console.log(`✅ POST response: ${url}`, response.status);
       return extractApiResponse<T>(response.data);
     } catch (error) {
+      console.error(`❌ POST error: ${url}`, error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`Status: ${error.response.status}`, error.response.data);
+      }
       throw handleApiError(error);
     }
   }

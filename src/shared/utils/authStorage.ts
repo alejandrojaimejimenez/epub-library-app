@@ -12,11 +12,23 @@ export const setAuthToken = async (token: string): Promise<void> => {
 };
 
 export const getAuthToken = async (): Promise<string | null> => {
-  return AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  try {
+    const token = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    console.log('🔐 getAuthToken:', token ? 'Token encontrado' : 'No hay token');
+    return token;
+  } catch (error) {
+    console.error('❌ Error al obtener token:', error);
+    return null;
+  }
 };
 
 export const removeAuthToken = async (): Promise<void> => {
-  await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    console.log('🗑️ Token eliminado correctamente');
+  } catch (error) {
+    console.error('❌ Error al eliminar token:', error);
+  }
 };
 
 // Funciones para manejar los datos del usuario
@@ -25,8 +37,19 @@ export const setUserData = async (userData: any): Promise<void> => {
 };
 
 export const getUserData = async (): Promise<any | null> => {
-  const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
-  return data ? JSON.parse(data) : null;
+  try {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
+    console.log('👤 getUserData:', data ? 'Datos encontrados' : 'No hay datos');
+    if (data) {
+      const parsedData = JSON.parse(data);
+      console.log('📋 Datos de usuario:', parsedData);
+      return parsedData;
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Error al obtener datos de usuario:', error);
+    return null;
+  }
 };
 
 export const removeUserData = async (): Promise<void> => {

@@ -89,6 +89,7 @@ const ReaderScreen: React.FC = () => {
     <View style={styles.container}>
       <EpubReader
         url={book.filePath || `${book.id}`}
+        bookId={book.id.toString()}
         initialLocation={initialCfi}
         onLocationChange={handleLocationChange}
       />

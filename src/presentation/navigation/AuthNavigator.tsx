@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../../shared/hooks/useAuth';
 
@@ -17,12 +18,33 @@ export type AuthStackParamList = {
 const Stack = createStackNavigator<AuthStackParamList>();
 
 const AuthNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
 
   // Si está cargando, podríamos mostrar una pantalla de splash o un indicador de carga
   if (isLoading) {
-    return null; // O un componente de carga
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <Text style={{ fontSize: 18, marginBottom: 20 }}>Cargando información de usuario...</Text>
+        <Text style={{ color: '#666', marginBottom: 10 }}>Estado: Verificando autenticación</Text>
+      </View>
+    );
   }
+
+  // Añadimos información de depuración si hay un error
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <Text style={{ fontSize: 18, color: 'red', marginBottom: 20 }}>Error de autenticación</Text>
+        <Text style={{ color: '#666', marginBottom: 10 }}>Mensaje: {error}</Text>
+        <Text style={{ color: '#666', marginBottom: 10 }}>Estado autenticado: {isAuthenticated ? 'Sí' : 'No'}</Text>
+      </View>
+    );
+  }
+  console.log('AuthNavigator: Renderizando navegación', {
+    isAuthenticated,
+    isLoading,
+    hasError: !!error
+  });
 
   return (
     <Stack.Navigator

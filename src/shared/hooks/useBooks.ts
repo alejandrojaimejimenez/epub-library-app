@@ -52,21 +52,39 @@ const useBooks = (): UseBooksReturn => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
     const [books, setBooks] = useState<Book[]>([]);
-    
-    useEffect(() => {
+      useEffect(() => {
         // Si tenemos los libros desde el contexto, los usamos
         if (contextBooks && contextBooks.length > 0) {
             setBooks(contextBooks);
             setLoading(false);
             return;
-        }        // Si no, los cargamos usando el caso de uso        
+        }        
+        
+        // Si no, los cargamos usando el caso de uso        
         const loadBooks = async (): Promise<void> => {
             try {
+                console.log('🔍 Intentando cargar libros desde el repositorio...');
                 // Cambiamos por el uso adecuado del repositorio para obtener todos los libros
                 const loadedBooks = await bookService.getBooks();
+                console.log(`✅ Libros cargados: ${loadedBooks ? loadedBooks.length : 0}`);
+                
+                if (loadedBooks && loadedBooks.length > 0) {
+                    console.log(`📚 Primer libro: ${JSON.stringify(loadedBooks[0])}`);
+                } else {
+                    console.log('⚠️ No se encontraron libros');
+                }
+                
                 setBooks(loadedBooks);
                 setLoading(false);
             } catch (err) {
+                console.error('❌ Error cargando libros:', err);
+                // Detalles adicionales para depuración
+                if (err instanceof Error) {
+                    console.error('Mensaje:', err.message);
+                    console.error('Stack:', err.stack);
+                } else {
+                    console.error('Tipo de error desconocido:', typeof err);
+                }
                 setError(err instanceof Error ? err : new Error('An unknown error occurred'));
                 setLoading(false);
             }

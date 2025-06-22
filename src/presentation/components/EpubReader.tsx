@@ -1,103 +1,81 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
 import { colors } from '../theme/colors';
 import Loading from './common/Loading';
 import DebugInfo from './common/DebugInfo';
 import useEpubParser from '../../shared/hooks/useEpubParser';
+import useBooks from '../../shared/hooks/useBooks';
 
 // Importamos el componente de la biblioteca externa
-// Cuando la biblioteca esté correctamente instalada, descomentar esta línea:
-// import { EpubReader as ExternalEpubReader } from 'epub-library-reader';
+import { EpubReader as ExternalEpubReader, EpubReaderRef } from 'epub-library-reader';
 
-// Mientras tanto, usamos la versión local o una importación alternativa
-// Este es un fallback temporal hasta que la biblioteca esté disponible correctamente
-const ExternalEpubReader = Platform.OS === 'web' 
-  ? require('./epub-readers/WebEpubViewer').default 
-  : Platform.OS === 'ios' || Platform.OS === 'android'
-    ? require('./epub-readers/NativeEpubViewer').default
-    : null;
+// Fallback para plataformas no web (si es necesario)
+const FallbackEpubReader = Platform.OS === 'ios' || Platform.OS === 'android'
+  ? require('./epub-readers/NativeEpubViewer').default
+  : null;
 
 interface EpubReaderProps {
   url: string;
+  bookId: string;
   initialLocation?: string;
   onLocationChange?: (location: string) => void;
 }
 
-/**
- * Componente principal para el lector de EPUB
- * Detecta automáticamente la plataforma y carga el lector apropiado (web o nativo)
- */
-const EpubReader: React.FC<EpubReaderProps> = ({ 
-  url, 
-  initialLocation, 
-  onLocationChange 
-}) => {
+const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
+  url,
+  bookId,
+  initialLocation,
+  onLocationChange
+}, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { loadEpub, loading, epubData, error: epubError } = useEpubParser();  const [logs, setLogs] = useState<string[]>([]);
+  const { loadEpub, loading: epubLoading, epubData, error: epubError } = useEpubParser();
+  const { updateLastReadPosition, getBookReadPosition } = useBooks();
+  const [logs, setLogs] = useState<string[]>([]);
   
-  // Solo mostrar depuración en desarrollo
-  const showDebug = false; // Cambiado de __DEV__ a false para ocultar el panel de depuración
-  
-  // Verificar la plataforma
-  const isWeb = Platform.OS === 'web';
-  const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
-  
+  // Usamos una ref para el componente EpubReader externo
+  const readerRef = useRef<EpubReaderRef>(null);
+
   // Función para agregar logs
   const addLog = useCallback((message: string) => {
-    console.log(message); // Log en consola
+    console.log(message);
     setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   }, []);
 
   // Manejar errores del lector
-  const handleReaderError = useCallback((error: Error) => {
-    const errorMsg = `Error en el lector: ${error.message}`;
+  const handleReaderError = useCallback((error: Error | string) => {
+    const errorObj = typeof error === 'string' ? new Error(error) : error;
+    const errorMsg = `Error en el lector: ${errorObj.message}`;
     addLog(`ERROR: ${errorMsg}`);
-    setError(error);
+    setError(errorObj);
     setIsLoading(false);
   }, [addLog]);
 
-  // Cargar el libro
-  const handleReloadEpub = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      addLog(`Recargando EPUB desde URL: ${url}`);
-      await loadEpub(url);
-      addLog('EPUB recargado correctamente');
-      setIsLoading(false);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Error desconocido');
-      addLog(`ERROR: ${error.message}`);
-      setError(error);
-      setIsLoading(false);
+  // Manejar cambios de ubicación
+  const handleLocationChange = useCallback((location: string) => {
+    addLog(`Nueva ubicación: ${location}`);
+    if (onLocationChange) {
+      onLocationChange(location);
     }
-  }, [url, loadEpub, addLog]);
+    // Actualizar la posición en el almacenamiento
+    // Convertimos el CFI a un número hash para almacenamiento
+    const locationHash = location ? Math.abs(location.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0)) : 0;
+    updateLastReadPosition(bookId, locationHash);
+  }, [bookId, onLocationChange, updateLastReadPosition, addLog]);
 
-  // Acciones de depuración
-  const handleDebugAction = useCallback((action: string) => {
-    switch (action) {
-      case 'show-url':
-        addLog(`URL del EPUB: ${epubData?.url || 'No disponible'}`);
-        break;
-      case 'show-platform':
-        addLog(`Plataforma actual: ${Platform.OS}`);
-        break;
-      default:
-        addLog(`Acción desconocida: ${action}`);
-    }
-  }, [epubData, addLog]);
-
-  // Cargar el libro al inicio
+  // Cargar el EPUB usando el repositorio
   useEffect(() => {
     const loadBook = async () => {
       try {
-        setIsLoading(true);
-        addLog(`Cargando EPUB desde URL: ${url}`);
-        await loadEpub(url);
+        addLog(`Cargando EPUB desde URL: ${bookId}`);
+        const data = await loadEpub(bookId);
         addLog('EPUB cargado correctamente');
         setIsLoading(false);
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Error desconocido');
+        const error = err instanceof Error ? err : new Error('Error desconocido al cargar el EPUB');
         addLog(`ERROR: ${error.message}`);
         setError(error);
         setIsLoading(false);
@@ -105,139 +83,168 @@ const EpubReader: React.FC<EpubReaderProps> = ({
     };
 
     loadBook();
-  }, [url, loadEpub, addLog]);
-  
-  // Registrar errores del parser
+  }, [bookId, loadEpub, addLog]);
+
+  // Actualizar el estado de error si hay un error del epub
   useEffect(() => {
     if (epubError) {
-      addLog(`Error del parser: ${epubError.message}`);
       setError(epubError);
     }
-  }, [epubError, addLog]);
-  
-  // Registrar información de plataforma
-  useEffect(() => {
-    addLog(`Plataforma detectada: ${Platform.OS}`);
-    
-    if (isWeb) {
-      addLog('Usando lector EPUB para Web');
-    } else if (isNative) {
-      addLog('Usando lector EPUB para dispositivos móviles');
-    } else {
-      addLog('Plataforma no soportada');
-    }
-  }, [isWeb, isNative, addLog]);
+  }, [epubError]);
 
-  // Mientras se carga el libro
-  if (isLoading || loading) {
-    return <Loading text="Cargando libro..." />;
-  }
-  // Si hay error o no hay datos
-  if (error || !epubData) {
+  // Exponemos los métodos necesarios a través del ref
+  React.useImperativeHandle(ref, () => ({
+    nextPage: () => {
+      if (readerRef.current) {
+        readerRef.current.nextPage();
+      }
+    },
+    prevPage: () => {
+      if (readerRef.current) {
+        readerRef.current.prevPage();
+      }
+    },
+    setLocation: (location: string) => {
+      if (readerRef.current) {
+        readerRef.current.setLocation(location);
+      }
+    },
+    setTheme: (theme: 'light' | 'dark' | 'sepia') => {
+      if (readerRef.current) {
+        readerRef.current.setTheme(theme);
+      }
+    },
+    setFontSize: (size: number) => {
+      if (readerRef.current) {
+        readerRef.current.setFontSize(size);
+      }
+    },
+    setFontFamily: (family: string) => {
+      if (readerRef.current) {
+        readerRef.current.setFontFamily(family);
+      }
+    }
+  }), [readerRef]);
+
+  // Solo mostrar depuración en desarrollo
+  const showDebug = false;
+
+  // Verificar la plataforma
+  const isWeb = Platform.OS === 'web';
+  const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
+
+  const renderReader = () => {
+    if (isLoading || epubLoading) {
+      return <Loading />;
+    }
+
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error.message}</Text>
+          <TouchableOpacity onPress={() => setError(null)} style={styles.retryButton}>
+            <Text style={styles.retryText}>Reintentar</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    if (!epubData) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>No se pudo cargar el EPUB</Text>
+        </View>
+      );
+    }
+
+    if (isWeb) {
+      return (
+        <ExternalEpubReader
+          ref={readerRef}
+          source={{ uri: epubData.url }}
+          initialLocation={initialLocation}
+          onLocationChange={handleLocationChange}
+          onError={handleReaderError}
+          onReady={() => setIsLoading(false)}
+          defaultTheme="light"
+          defaultFontSize={18}
+        />
+      );
+    }
+
+    if (isNative && FallbackEpubReader) {
+      return (
+        <FallbackEpubReader
+          url={epubData.url}
+          initialLocation={initialLocation}
+          onLocationChange={handleLocationChange}
+          onError={handleReaderError}
+        />
+      );
+    }
+
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>
-          {error?.message || 'No se pudo cargar el libro. Por favor, inténtalo de nuevo.'}
-        </Text>
-        
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={handleReloadEpub}
-        >
-          <Text style={styles.buttonText}>Reintentar</Text>
-        </TouchableOpacity>
-        
-        {showDebug && (
-          <DebugInfo 
-            visible={true}
-            bookId={url}
-            actions={[
-              { label: 'Reintentar', action: handleReloadEpub },
-              { label: 'Ver URL', action: () => handleDebugAction('show-url') },
-              { label: 'Ver plataforma', action: () => handleDebugAction('show-platform') }
-            ]}
-            logs={logs}
-          />
-        )}
+        <Text style={styles.errorText}>Plataforma no soportada</Text>
       </View>
     );
-  }  // Usar el nuevo lector EPUB integrado (funciona tanto en web como en dispositivos nativos)
+  };
+
+  const handleDebugAction = (action: string) => {
+    switch (action) {
+      case 'clear':
+        setLogs([]);
+        break;
+      case 'reload':
+        setError(null);
+        setIsLoading(true);
+        break;
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <ExternalEpubReader
-        // Para el componente actual (provisional)
-        url={epubData.url}
-        initialLocation={initialLocation}
-        onLocationChange={onLocationChange}
-        onError={handleReaderError}
-        onReady={() => addLog('Lector EPUB listo')}
-        blob={epubData.blob}
-        arrayBuffer={epubData.arrayBuffer}
-        
-        // Para el componente externo (cuando esté disponible):
-        // Descomentar estas líneas cuando se utilice la biblioteca externa
-        /*
-        source={{ 
-          uri: epubData.url,
-        }}
-        defaultTheme="light"
-        defaultFontSize={18}
-        showControls={true}
-        onReady={() => addLog('Lector EPUB listo')}
-        onLocationChange={onLocationChange}
-        onError={(errorMsg: string) => {
-          const error = new Error(errorMsg);
-          addLog(`ERROR: ${errorMsg}`);
-          setError(error);
-        }}
-        */
-      />
-      
+      {renderReader()}
       {showDebug && (
-        <DebugInfo 
+        <DebugInfo
           visible={true}
-          bookId={url}
-          actions={[
-            { label: 'Recargar', action: handleReloadEpub },
-            { label: 'Ver URL', action: () => handleDebugAction('show-url') }
-          ]}
           logs={logs}
+          actions={[
+            { label: 'Limpiar logs', action: () => handleDebugAction('clear') },
+            { label: 'Recargar', action: () => handleDebugAction('reload') }
+          ]}
         />
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.background,
+    padding: 20
   },
   errorText: {
     color: colors.error,
-    textAlign: 'center',
     fontSize: 16,
     marginBottom: 20,
+    textAlign: 'center'
   },
-  button: {
+  retryButton: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    padding: 10,
+    borderRadius: 5
   },
-  buttonText: {
-    color: colors.textLight,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  retryText: {
+    color: '#ffffff', // Usando valor literal en lugar de colors.white
+    fontSize: 14
+  }
 });
 
 export default EpubReader;
