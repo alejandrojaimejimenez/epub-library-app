@@ -32,8 +32,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const TabNavigator = () => {
   console.log('🔄 Renderizando TabNavigator');
   
-  return (
-    <Tab.Navigator
+  return (    <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
         headerShown: false,
@@ -44,7 +43,7 @@ const TabNavigator = () => {
         tabBarActiveTintColor: '#2E7D32',
         tabBarInactiveTintColor: '#757575',
       }}
-    >
+    >{/* Eliminamos posibles espacios en blanco entre las etiquetas */}
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
@@ -81,13 +80,12 @@ const TabIcon = ({ name, color, size }: { name: string; color: string; size: num
 const AppNavigator = () => {
   console.log('🔄 Renderizando AppNavigator');
 
-  return (
-    <Stack.Navigator
+  return (    <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
       initialRouteName="TabNavigator"
-    >
+    >{/* Eliminamos posibles espacios en blanco entre las etiquetas */}
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name="BookDetail" component={BookDetailScreen} />
       <Stack.Screen 

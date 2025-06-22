@@ -6,13 +6,20 @@ import DebugInfo from './common/DebugInfo';
 import useEpubParser from '../../shared/hooks/useEpubParser';
 import useBooks from '../../shared/hooks/useBooks';
 
-// Importamos el componente de la biblioteca externa
-import { EpubReader as ExternalEpubReader, EpubReaderRef } from 'epub-library-reader';
+// Importamos los componentes específicos de plataforma
+import WebEpubViewer, { WebEpubViewerRef } from './epub-readers/WebEpubViewer';
+import NativeEpubViewer, { NativeEpubViewerRef } from './epub-readers/NativeEpubViewer';
 
-// Fallback para plataformas no web (si es necesario)
-const FallbackEpubReader = Platform.OS === 'ios' || Platform.OS === 'android'
-  ? require('./epub-readers/NativeEpubViewer').default
-  : null;
+// Definimos una interfaz común para ambas implementaciones
+export interface EpubReaderRef {
+  nextPage: () => void;
+  prevPage: () => void;
+  setLocation: (location: string) => void;
+  setTheme: (theme: 'light' | 'dark' | 'sepia') => void;
+  setFontSize: (size: number) => void;
+  setFontFamily: (family: string) => void;
+}
+
 
 interface EpubReaderProps {
   url: string;
@@ -30,11 +37,15 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { loadEpub, loading: epubLoading, epubData, error: epubError } = useEpubParser();
-  const { updateLastReadPosition, getBookReadPosition } = useBooks();
+  const { updateLastReadPosition } = useBooks();
   const [logs, setLogs] = useState<string[]>([]);
+  // Refs para los componentes de lector
+  const webReaderRef = useRef<WebEpubViewerRef>(null);
+  const nativeReaderRef = useRef<NativeEpubViewerRef>(null);
   
-  // Usamos una ref para el componente EpubReader externo
-  const readerRef = useRef<EpubReaderRef>(null);
+  // Variables de estado para el reintento
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   // Función para agregar logs
   const addLog = useCallback((message: string) => {
@@ -50,40 +61,63 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
     setError(errorObj);
     setIsLoading(false);
   }, [addLog]);
-
   // Manejar cambios de ubicación
   const handleLocationChange = useCallback((location: string) => {
+    // Ignorar valores nulos o indefinidos
+    if (!location) {
+      addLog('Se ignoró cambio de ubicación con valor nulo o vacío');
+      return;
+    }
+    
     addLog(`Nueva ubicación: ${location}`);
     if (onLocationChange) {
       onLocationChange(location);
     }
-    // Actualizar la posición en el almacenamiento
-    // Convertimos el CFI a un número hash para almacenamiento
-    const locationHash = location ? Math.abs(location.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0)) : 0;
-    updateLastReadPosition(bookId, locationHash);
+    
+    try {
+      // Actualizar la posición en el almacenamiento
+      // Convertimos el CFI a un número hash para almacenamiento
+      const locationHash = Math.abs(location.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0));
+      
+      addLog(`Guardando posición con hash: ${locationHash}`);
+      updateLastReadPosition(bookId, locationHash);
+    } catch (error) {
+      addLog(`ERROR al guardar posición: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }, [bookId, onLocationChange, updateLastReadPosition, addLog]);
 
   // Cargar el EPUB usando el repositorio
   useEffect(() => {
     const loadBook = async () => {
       try {
-        addLog(`Cargando EPUB desde URL: ${bookId}`);
+        addLog(`Cargando EPUB desde URL: ${bookId} (intento ${retryCount + 1}/${MAX_RETRIES + 1})`);
         const data = await loadEpub(bookId);
         addLog('EPUB cargado correctamente');
         setIsLoading(false);
+        setRetryCount(0); // Reiniciar contador de intentos al cargar con éxito
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Error desconocido al cargar el EPUB');
         addLog(`ERROR: ${error.message}`);
-        setError(error);
-        setIsLoading(false);
+        
+        // Intentar recargar automáticamente si no se ha superado el máximo de intentos
+        if (retryCount < MAX_RETRIES) {
+          const nextRetry = retryCount + 1;
+          addLog(`Reintentando carga automáticamente (${nextRetry}/${MAX_RETRIES})...`);
+          setRetryCount(nextRetry);
+          // No establecer error para que no se muestre el mensaje de error
+        } else {
+          addLog(`Se alcanzó el máximo de intentos (${MAX_RETRIES})`);
+          setError(error);
+          setIsLoading(false);
+        }
       }
     };
 
     loadBook();
-  }, [bookId, loadEpub, addLog]);
+  }, [bookId, loadEpub, addLog, retryCount]);
 
   // Actualizar el estado de error si hay un error del epub
   useEffect(() => {
@@ -95,58 +129,70 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
   // Exponemos los métodos necesarios a través del ref
   React.useImperativeHandle(ref, () => ({
     nextPage: () => {
-      if (readerRef.current) {
-        readerRef.current.nextPage();
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.nextPage();
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.nextPage();
       }
     },
     prevPage: () => {
-      if (readerRef.current) {
-        readerRef.current.prevPage();
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.prevPage();
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.prevPage();
       }
     },
     setLocation: (location: string) => {
-      if (readerRef.current) {
-        readerRef.current.setLocation(location);
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.setLocation(location);
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.setLocation(location);
       }
     },
     setTheme: (theme: 'light' | 'dark' | 'sepia') => {
-      if (readerRef.current) {
-        readerRef.current.setTheme(theme);
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.setTheme(theme);
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.setTheme(theme);
       }
     },
     setFontSize: (size: number) => {
-      if (readerRef.current) {
-        readerRef.current.setFontSize(size);
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.setFontSize(size);
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.setFontSize(size);
       }
     },
     setFontFamily: (family: string) => {
-      if (readerRef.current) {
-        readerRef.current.setFontFamily(family);
+      if (Platform.OS === 'web' && webReaderRef.current) {
+        webReaderRef.current.setFontFamily(family);
+      } else if (Platform.OS !== 'web' && nativeReaderRef.current) {
+        nativeReaderRef.current.setFontFamily(family);
       }
     }
-  }), [readerRef]);
+  }), [webReaderRef, nativeReaderRef]);
 
   // Solo mostrar depuración en desarrollo
   const showDebug = false;
 
-  // Verificar la plataforma
-  const isWeb = Platform.OS === 'web';
-  const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
+  const renderError = () => (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorText}>{error?.message || 'No se pudo cargar el EPUB'}</Text>
+      {error && (
+        <TouchableOpacity onPress={() => setError(null)} style={styles.retryButton}>
+          <Text style={styles.retryText}>Reintentar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
-  const renderReader = () => {
+  const renderContent = () => {
     if (isLoading || epubLoading) {
       return <Loading />;
     }
 
     if (error) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error.message}</Text>
-          <TouchableOpacity onPress={() => setError(null)} style={styles.retryButton}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
-      );
+      return renderError();
     }
 
     if (!epubData) {
@@ -155,13 +201,12 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
           <Text style={styles.errorText}>No se pudo cargar el EPUB</Text>
         </View>
       );
-    }
-
-    if (isWeb) {
+    }    // Renderizar componente según plataforma
+    if (Platform.OS === 'web') {
       return (
-        <ExternalEpubReader
-          ref={readerRef}
-          source={{ uri: epubData.url }}
+        <WebEpubViewer
+          ref={webReaderRef}
+          url={epubData.url}
           initialLocation={initialLocation}
           onLocationChange={handleLocationChange}
           onError={handleReaderError}
@@ -170,11 +215,10 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
           defaultFontSize={18}
         />
       );
-    }
-
-    if (isNative && FallbackEpubReader) {
+    } else {
       return (
-        <FallbackEpubReader
+        <NativeEpubViewer
+          ref={nativeReaderRef}
           url={epubData.url}
           initialLocation={initialLocation}
           onLocationChange={handleLocationChange}
@@ -182,12 +226,6 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
         />
       );
     }
-
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Plataforma no soportada</Text>
-      </View>
-    );
   };
 
   const handleDebugAction = (action: string) => {
@@ -204,7 +242,7 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
 
   return (
     <View style={styles.container}>
-      {renderReader()}
+      {renderContent()}
       {showDebug && (
         <DebugInfo
           visible={true}

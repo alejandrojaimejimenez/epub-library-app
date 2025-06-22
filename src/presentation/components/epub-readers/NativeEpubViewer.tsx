@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { colors } from '../../theme/colors';
@@ -10,27 +10,109 @@ interface NativeEpubViewerProps {
   onError?: (error: Error) => void;
 }
 
+export interface NativeEpubViewerRef {
+  nextPage: () => void;
+  prevPage: () => void;
+  setLocation: (location: string) => void;
+  setTheme: (theme: 'light' | 'dark' | 'sepia') => void;
+  setFontSize: (size: number) => void;
+  setFontFamily: (family: string) => void;
+}
+
 /**
  * Visor de EPUB para plataformas nativas (iOS/Android)
  * que utiliza WebView para renderizar el contenido EPUB
  */
-const NativeEpubViewer: React.FC<NativeEpubViewerProps> = ({
+const NativeEpubViewer = forwardRef<NativeEpubViewerRef, NativeEpubViewerProps>(({
   url,
   initialLocation,
   onLocationChange,
   onError
-}) => {
+}, ref) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const webViewRef = useRef<WebView>(null);
 
+  // Función para ejecutar JavaScript en el WebView
+  const runJavaScript = useCallback((script: string) => {
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        try {
+          ${script}
+        } catch (e) {
+          console.error("Error ejecutando script:", e);
+        }
+        true;
+      `);
+    }
+  }, [webViewRef]);
+
+  // Exponemos las funciones a través de la ref
+  useImperativeHandle(ref, () => ({
+    nextPage: () => {
+      runJavaScript('if (window.rendition) window.rendition.next();');
+    },
+    prevPage: () => {
+      runJavaScript('if (window.rendition) window.rendition.prev();');
+    },
+    setLocation: (location: string) => {
+      runJavaScript(`if (window.rendition) window.rendition.display("${location}");`);
+    },
+    setTheme: (theme: 'light' | 'dark' | 'sepia') => {
+      let backgroundColor, textColor;
+      switch (theme) {
+        case 'dark':
+          backgroundColor = '#333333';
+          textColor = '#ffffff';
+          break;
+        case 'sepia':
+          backgroundColor = '#fbf0d9';
+          textColor = '#5b4636';
+          break;
+        default:
+          backgroundColor = '#ffffff';
+          textColor = '#000000';
+      }
+      runJavaScript(`
+        if (window.rendition && window.rendition.themes) {
+          window.rendition.themes.register('${theme}', { 
+            body: { 
+              color: '${textColor}', 
+              background: '${backgroundColor}' 
+            } 
+          });
+          window.rendition.themes.select('${theme}');
+        }
+      `);
+    },
+    setFontSize: (size: number) => {
+      runJavaScript(`
+        if (window.rendition && window.rendition.themes) {
+          window.rendition.themes.fontSize("${size}px");
+        }
+      `);
+    },
+    setFontFamily: (family: string) => {
+      runJavaScript(`
+        if (window.rendition && window.rendition.themes) {
+          window.rendition.themes.font("${family}");
+        }
+      `);
+    }
+  }), [runJavaScript]);
   // Manejar mensajes del WebView
   const handleWebViewMessage = useCallback((event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       
       if (data.type === 'location' && onLocationChange) {
-        console.log('NativeEpubViewer: Ubicación cambiada:', data.value);
-        onLocationChange(data.value);
+        // Verificar que el valor sea válido antes de procesarlo
+        if (data.value) {
+          console.log('NativeEpubViewer: Ubicación cambiada:', data.value);
+          onLocationChange(data.value);
+        } else {
+          console.log('NativeEpubViewer: Se ignoró cambio de ubicación con valor inválido');
+        }
       } else if (data.type === 'error') {
         console.error('NativeEpubViewer: Error desde WebView:', data.message);
         setError(data.message);
@@ -76,11 +158,12 @@ const NativeEpubViewer: React.FC<NativeEpubViewerProps> = ({
       
       // Ir a la ubicación inicial si existe
       ${initialLocation ? `rendition.display("${initialLocation}");` : 'rendition.display();'}
-      
-      // Registrar cambios de ubicación
+        // Registrar cambios de ubicación
       rendition.on("locationChanged", (location) => {
-        if (location && location.start) {
+        if (location && location.start && location.start.cfi) {
           sendMessage("location", location.start.cfi);
+        } else {
+          console.log("Se ignoró cambio de ubicación con valor inválido");
         }
       });
       
@@ -198,10 +281,10 @@ const NativeEpubViewer: React.FC<NativeEpubViewerProps> = ({
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
       <WebView
+        ref={webViewRef}
         source={{ html: htmlContent }}
         style={styles.webView}
         onMessage={handleWebViewMessage}
@@ -219,7 +302,7 @@ const NativeEpubViewer: React.FC<NativeEpubViewerProps> = ({
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

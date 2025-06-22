@@ -36,8 +36,7 @@ export class BookRepository implements IBookRepository {
 
   async getTags(): Promise<{id: string, name: string}[]> {
     return await ApiClient.get<{id: string, name: string}[]>(API_ENDPOINTS.GET_TAGS);
-  }
-  async updateReadPosition(
+  }  async updateReadPosition(
     bookId: string, 
     position: number, 
     cfi?: string,
@@ -45,14 +44,21 @@ export class BookRepository implements IBookRepository {
     user: string = 'usuario1',
     device: string = 'browser'
   ): Promise<void> {
-    await ApiClient.post(API_ENDPOINTS.UPDATE_READ_POSITION(bookId), {
-      bookId,
-      position,
-      cfi,
-      format,
-      user,
-      device
-    });
+    try {
+      await ApiClient.post(API_ENDPOINTS.UPDATE_READ_POSITION(bookId), {
+        bookId,
+        position,
+        cfi,
+        format,
+        user,
+        device
+      });
+    } catch (error) {
+      console.error(`Error al actualizar posición para libro ${bookId}:`, error);
+      // En caso de error, intentamos continuar sin interrumpir la experiencia del usuario
+      // pero propagamos el error para registro
+      throw error;
+    }
   }
 
   async getReadPosition(

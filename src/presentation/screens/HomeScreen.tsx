@@ -10,7 +10,8 @@ import useBooks from '../../shared/hooks/useBooks';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { Book } from '../../domain/models/Book';
 
-const HomeScreen: React.FC = () => {  const navigation = useNavigation<any>();
+const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const { books, loading, error, getBooksByTag } = useBooks();
   const { user } = useAuth();
   const [recentBooks, setRecentBooks] = useState<Book[]>([]);
@@ -76,9 +77,9 @@ const HomeScreen: React.FC = () => {  const navigation = useNavigation<any>();
       </View>
     );
   }
-
   return (
-    <View style={styles.container}>      <Header 
+    <View style={styles.container}>
+      <Header 
         title="Mi Biblioteca de EPUB" 
         rightComponent={
           <TouchableOpacity onPress={navigateToLibrary}>

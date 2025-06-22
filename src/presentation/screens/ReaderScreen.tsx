@@ -26,18 +26,31 @@ const ReaderScreen: React.FC = () => {
   const [currentCfi, setCurrentCfi] = useState<string | undefined>(undefined);
   
   const { book, initialPosition, initialCfi } = route.params;
-
   useEffect(() => {
     // Configurar el título de la pantalla
     navigation.setOptions({ title: book.title });
     
-    // Intercepción del botón de retroceso
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleExit();
-      return true;
-    });
+    // Intercepción del botón de retroceso (solo en plataformas nativas)
+    if (Platform.OS !== 'web') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        handleExit();
+        return true;
+      });
+      
+      return () => backHandler.remove();
+    }
     
-    return () => backHandler.remove();
+    // Para plataformas web, podemos usar el API de History si es necesario
+    if (Platform.OS === 'web') {
+      const handleWebBack = () => {
+        handleExit();
+        // No utilizamos preventDefault para permitir que la navegación web funcione normalmente
+      };
+      
+      // Opcionalmente, podríamos añadir un listener para la tecla ESC
+      // window.addEventListener('popstate', handleWebBack);
+      // return () => window.removeEventListener('popstate', handleWebBack);
+    }
   }, [book, navigation]);
 
   // Función para guardar la posición de lectura actual

@@ -153,8 +153,7 @@ const useBooks = (): UseBooksReturn => {
             return [];
         }
     }, []);
-    
-    // Función para actualizar la posición de lectura
+      // Función para actualizar la posición de lectura
     const updateLastReadPosition = useCallback(async (
         bookId: string, 
         position: number, 
@@ -163,13 +162,24 @@ const useBooks = (): UseBooksReturn => {
         user: string = 'usuario1',
         device: string = 'browser'
     ): Promise<void> => {
+        // Evitar actualizaciones con posiciones inválidas
+        if (!bookId || position === undefined || position < 0) {
+            console.warn('Se ignoró actualización de posición con datos inválidos:', { bookId, position });
+            return;
+        }
+        
         try {
+            console.log(`Actualizando posición para libro ${bookId}: posición=${position}, cfi=${cfi || 'N/A'}`);
             await updateReadPositionUseCase.execute(bookId, position, cfi, format, user, device);
-            // No se propaga ningún error para no interrumpir la experiencia de lectura
+            console.log('Posición actualizada correctamente');
         } catch (err) {
-            console.error('Error en updateLastReadPosition:', err);
+            // Capturar y registrar el error, pero no interrumpir la experiencia del usuario
+            console.error('Error al actualizar posición de lectura:', err);
+            if (err instanceof Error) {
+                console.error('Mensaje:', err.message);
+                console.error('Stack:', err.stack);
+            }
             // No establecemos el error global para no mostrar mensajes al usuario
-            // pero sí lo registramos para depuración
         }
     }, []);
 
