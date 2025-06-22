@@ -12,21 +12,72 @@ Epub Library App es una aplicación móvil y web desarrollada con React Native, 
 - **Versión Web y Móvil**: Funciona tanto en navegadores como en dispositivos móviles.
 - **Dockerización**: Despliegue sencillo con Docker y Docker Compose.
 
-## Estructura del Proyecto
+## Arquitectura del Proyecto
 
-El proyecto está organizado en varias carpetas y archivos, cada uno con una función específica:
+Este proyecto sigue una arquitectura de estilo Clean Architecture con la estructura en capas. Es una aplicación nativa multiplataforma compatible con Android, iOS y Web. El proyecto utiliza TypeScript para garantizar la seguridad de tipos.
 
-- **src/api**: Configuración del cliente API y definición de endpoints.
-- **src/components**: Componentes reutilizables de la interfaz de usuario.
-- **src/constants**: Constantes utilizadas en la aplicación, como colores y configuraciones.
-- **src/context**: Contexto para manejar el estado de la biblioteca.
-- **src/hooks**: Hooks personalizados para manejar la lógica de libros y análisis de EPUB.
-- **src/navigation**: Configuración de la navegación de la aplicación.
-- **src/screens**: Pantallas principales de la aplicación.
-- **src/services**: Servicios para manejar la conexión con la API del backend.
-- **src/utils**: Funciones auxiliares para manejar archivos y formatear datos.
+### Estructura de carpetas en src:
 
-## Arquitectura
+#### 1. **`application/`** 
+Esta carpeta contiene la lógica de aplicación y casos de uso.
+   - **`services/`**: Servicios que implementan la lógica de negocio de la aplicación.
+     - `books.ts`: Servicios relacionados con libros.
+     - `epub.ts`: Servicios para manejo de archivos EPUB.
+   - **`usecases/`**: Implementa los casos de uso específicos de la aplicación.
+     - `book-usecases.ts`: Casos de uso para operaciones con libros.
+     - `epub-usecases.ts`: Casos de uso para operaciones con EPUBs.
+
+#### 2. **`domain/`** 
+Contiene la lógica de negocio y las entidades principales independientes de cualquier framework.
+   - **`interfaces/`**: Definiciones de interfaces que describen los contratos del dominio.
+   - **`models/`**: Modelos de datos que representan las entidades del dominio.
+     - `Book.ts`: Definición de libros, autores y etiquetas.
+     - `Api.ts`: Definición de respuestas y errores de API.
+   - **`repositories/`**: Interfaces para repositorios de datos.
+     - `IBookRepository.ts`: Interfaz para el repositorio de libros.
+     - `IEpubRepository.ts`: Interfaz para el repositorio de EPUBs.
+
+#### 3. **`infrastructure/`** 
+Contiene implementaciones técnicas y comunicación con servicios externos.
+   - **`api/`**: Implementaciones de clientes API.
+     - `client.ts`: Cliente de API general.
+     - `endpoints.ts`: Definición de endpoints de la API.
+   - **`core/`**: Componentes centrales como clases base y loggers.
+   - **`data/`**: Capa de acceso a datos.
+     - `BookRepository.ts`: Implementación del repositorio de libros.
+     - `EpubRepository.ts`: Implementación del repositorio de EPUBs.
+   - **`storage/`**: Almacenamiento local persistente.
+
+#### 4. **`presentation/`** 
+Contiene todos los componentes relacionados con la interfaz de usuario.
+   - **`components/`**: Componentes reutilizables de UI.
+     - `BookCard.tsx`: Tarjeta para mostrar información de un libro.
+     - `BookList.tsx`: Lista de libros.
+     - `EpubReader.tsx`: Componente para leer EPUBs.
+     - `common/`: Componentes básicos reutilizables.
+   - **`navigation/`**: Configuración de rutas y navegación.
+     - `AppNavigator.tsx`: Navegador principal de la aplicación.
+   - **`screens/`**: Pantallas principales de la aplicación.
+     - `HomeScreen.tsx`: Pantalla principal.
+     - `LibraryScreen.tsx`: Pantalla de biblioteca.
+     - `BookDetailScreen.tsx`: Pantalla de detalle de libro.
+     - `ReaderScreen.tsx`: Pantalla de lector de EPUB.
+   - **`theme/`**: Definición de estilos, temas y configuración visual.
+     - `colors.ts`: Paleta de colores de la aplicación.
+
+#### 5. **`shared/`** 
+Contiene utilidades y código compartido entre capas.
+   - **`constants/`**: Constantes utilizadas en toda la aplicación.
+   - **`context/`**: Contextos de React para el estado global.
+     - `LibraryContext.tsx`: Contexto para gestionar la biblioteca de libros.
+   - **`hooks/`**: Hooks personalizados de React.
+     - `useBooks.ts`: Hook para operaciones con libros.
+     - `useEpubParser.ts`: Hook para manejo de archivos EPUB.
+   - **`types/`**: Definiciones de tipos TypeScript.
+   - **`utils/`**: Funciones de utilidad genéricas.
+     - `apiHelpers.ts`: Utilidades para manejar respuestas y errores de API.
+
+## Arquitectura General
 
 La aplicación utiliza una arquitectura cliente-servidor:
 
@@ -38,7 +89,7 @@ La aplicación utiliza una arquitectura cliente-servidor:
 2. **Frontend** (este proyecto)
    - Consume la API del backend
    - Proporciona interfaz de usuario para navegación y lectura
-   - Funciona en web y móvil
+   - Funciona en web y móvil con estructura Clean Architecture
 
 ## Requisitos
 
