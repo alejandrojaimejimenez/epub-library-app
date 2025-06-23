@@ -1,6 +1,6 @@
-import { IEpubRepository } from '../../domain/repositories/IEpubRepository';
-import { API_ENDPOINTS } from '../api/endpoints';
-import { getAuthToken } from '../../shared/utils/authStorage';
+import { IEpubRepository } from '@repositories/IEpubRepository';
+import { API_ENDPOINTS } from '@api/endpoints';
+import { getAuthToken } from '@utils/authStorage';
 
 export class EpubRepository implements IEpubRepository {
   async loadEpub(file: string): Promise<any> {

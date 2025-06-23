@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, ListRenderItemInfo } from 'react-native';
-import { Book } from '../../domain/models/Book';
-import BookCard from './BookCard';
-import { colors } from '../theme/colors';
+import { MBook } from '@models/Book';
+import BookCard from '@components/BookCard';
+import { colors } from '@theme/colors';
 
 interface BookListProps {
   title?: string;
-  books: Book[];
-  onBookPress: (book: Book) => void;
+  books: MBook[];
+  onBookPress: (book: MBook) => void;
   horizontal?: boolean;
   showsHorizontalScrollIndicator?: boolean;
 }
@@ -19,7 +19,7 @@ const BookList: React.FC<BookListProps> = ({
   horizontal = true,
   showsHorizontalScrollIndicator = false 
 }) => {
-  const renderItem = ({ item }: ListRenderItemInfo<Book>) => (
+  const renderItem = ({ item }: ListRenderItemInfo<MBook>) => (
     <BookCard 
       book={item} 
       onPress={onBookPress} 

@@ -1,5 +1,5 @@
-import { MBook, MReadPosition } from '../../domain/models/Book';
-import { SBooks } from '../services/books';
+import { MBook, MReadPosition } from '@models/Book';
+import { SBooks } from '@services/books';
 
 export class GetBooksUseCase {
   private bookService: SBooks;

@@ -1,9 +1,9 @@
-import { EpubService } from '../services/epub';
+import { SEpub } from '@services/epub';
 
 export class LoadEpubUseCase {
-  private epubService: EpubService;
+  private epubService: SEpub;
 
-  constructor(epubService: EpubService) {
+  constructor(epubService: SEpub) {
     this.epubService = epubService;
   }
 

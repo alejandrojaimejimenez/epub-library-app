@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../../shared/constants/config';
+import { API_BASE_URL } from '@constants/config';
 
 // API Endpoints
 export const API_ENDPOINTS = {

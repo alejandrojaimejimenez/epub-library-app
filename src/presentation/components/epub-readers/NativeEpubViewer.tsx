@@ -1,7 +1,7 @@
 import React, { useState, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { colors } from '../../theme/colors';
+import { colors } from '@theme/colors';
 
 interface NativeEpubViewerProps {
   url: string;

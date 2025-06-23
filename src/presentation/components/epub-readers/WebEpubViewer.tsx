@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { colors } from '../../theme/colors';
-import Loading from '../common/Loading';
+import { colors } from '@theme/colors';
+import Loading from '@components/common/Loading';
 import ePub from 'epubjs';
 import { TouchableOpacity } from 'react-native';
 

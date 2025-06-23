@@ -1,7 +1,7 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { EpubReader as OriginalEpubReader, EpubReaderRef } from 'epub-library-reader';
-import { colors } from '../../theme/colors';
+import { colors } from '@theme/colors';
 import ReactDOM from 'react-dom';
 
 // Propiedades para nuestro wrapper

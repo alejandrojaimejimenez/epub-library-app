@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
-import { colors } from '../theme/colors';
-import Loading from './common/Loading';
-import DebugInfo from './common/DebugInfo';
-import useEpubParser from '../../shared/hooks/useEpubParser';
-import useBooks from '../../shared/hooks/useBooks';
+import { colors } from '@theme/colors';
+import Loading from '@components/common/Loading';
+import DebugInfo from '@components/common/DebugInfo';
+import useEpubParser from '@hooks/useEpubParser';
+import useBooks from '@hooks/useBooks';
 
 // Importamos los componentes específicos de plataforma
-import WebEpubViewer, { WebEpubViewerRef } from './epub-readers/WebEpubViewer';
-import NativeEpubViewer, { NativeEpubViewerRef } from './epub-readers/NativeEpubViewer';
+import WebEpubViewer, { WebEpubViewerRef } from '@components/epub-readers/WebEpubViewer';
+import NativeEpubViewer, { NativeEpubViewerRef } from '@components/epub-readers/NativeEpubViewer';
 
 // Definimos una interfaz común para ambas implementaciones
 export interface EpubReaderRef {

@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useAuth } from '../../shared/hooks/useAuth';
+import { useAuth } from '@hooks/useAuth';
 
 // Screens
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import AppNavigator from './AppNavigator';
+import LoginScreen from '@screens/LoginScreen';
+import RegisterScreen from '@screens/RegisterScreen';
+import AppNavigator from '@navigation/AppNavigator';
 
 // Define los tipos para las rutas de autenticación
 export type AuthStackParamList = {

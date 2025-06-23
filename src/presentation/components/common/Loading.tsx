@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { colors } from '../../theme/colors';
+import { colors } from '@theme/colors';
 
 interface LoadingProps {
   text?: string;

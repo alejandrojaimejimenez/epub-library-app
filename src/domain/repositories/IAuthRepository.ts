@@ -1,4 +1,4 @@
-import { MUser, MLoginCredentials, MRegisterData, MAuthResponse } from '../models/Auth';
+import { MUser, MLoginCredentials, MRegisterData, MAuthResponse } from '@models/Auth';
 
 export interface IAuthRepository {
   login(credentials: MLoginCredentials): Promise<MAuthResponse>;

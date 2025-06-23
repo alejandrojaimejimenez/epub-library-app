@@ -4,19 +4,19 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Screens
-import HomeScreen from '../screens/HomeScreen';
-import LibraryScreen from '../screens/LibraryScreen';
-import BookDetailScreen from '../screens/BookDetailScreen';
-import ReaderScreen from '../screens/ReaderScreen';
+import HomeScreen from '@screens/HomeScreen';
+import LibraryScreen from '@screens/LibraryScreen';
+import BookDetailScreen from '@screens/BookDetailScreen';
+import ReaderScreen from '@screens/ReaderScreen';
 
 // Types
-import { Book } from '../../domain/models/Book';
+import { MBook } from '@models/Book';
 
 // Define los tipos de parámetros para las rutas
 export type RootStackParamList = {
   TabNavigator: undefined;
-  BookDetail: { book: Book } | { bookId: string };
-  Reader: { book: Book; initialPosition?: number; initialCfi?: string };
+  BookDetail: { book: MBook } | { bookId: string };
+  Reader: { book: MBook; initialPosition?: number; initialCfi?: string };
 };
 
 export type TabParamList = {

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useAuth } from '../../shared/hooks/useAuth';
-import { AuthStackParamList } from '../navigation/AuthNavigator';
+import { useAuth } from '@hooks/useAuth';
+import { AuthStackParamList } from '@navigation/AuthNavigator';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 

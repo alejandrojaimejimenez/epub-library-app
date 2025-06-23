@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
-import { colors } from '../../theme/colors';
+import { colors } from '@theme/colors';
 
 interface DebugInfoProps {
   visible: boolean;

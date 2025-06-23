@@ -1,9 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { ApiResponse } from '../../domain/models/Api';
-import { handleApiError, extractApiResponse } from '../../shared/utils/apiHelpers';
+import axios, { AxiosInstance } from 'axios';
+import { ApiResponse } from '@models/Api';
+import { handleApiError, extractApiResponse } from '@utils/apiHelpers';
 import { API_ENDPOINTS } from './endpoints';
-import config, { API_BASE_URL } from '../../shared/constants/config';
-import { getAuthToken } from '../../shared/utils/authStorage';
+import config, { API_BASE_URL } from '@constants/config';
+import { getAuthToken } from '@utils/authStorage';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

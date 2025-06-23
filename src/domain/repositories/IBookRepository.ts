@@ -1,4 +1,4 @@
-import { MBook, MAuthor, MTag, MReadPosition } from '@models/Book';
+import { MBook, MReadPosition } from '@models/Book';
 
 export interface IBookRepository {
   getBooks(): Promise<MBook[]>;

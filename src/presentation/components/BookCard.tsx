@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { MBook } from '../../domain/models/Book';
-import { colors } from '../theme/colors';
+import { MBook } from '@models/Book';
+import { colors } from '@theme/colors';
 
 interface BookCardProps {
   book: MBook;
