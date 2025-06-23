@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BookList from '../components/BookList';
-import Loading from '../components/common/Loading';
-import Header from '../components/common/Header';
-import LogoutButton from '../components/common/LogoutButton';
-import { colors } from '../theme/colors';
-import useBooks from '../../shared/hooks/useBooks';
-import { useAuth } from '../../shared/hooks/useAuth';
-import { Book } from '../../domain/models/Book';
+import BookList from '@components/BookList';
+import Loading from '@components/common/Loading';
+import Header from '@components/common/Header';
+import LogoutButton from '@components/common/LogoutButton';
+import { colors } from '@theme/colors';
+import useBooks from '@hooks/useBooks';
+import { useAuth } from '@hooks/useAuth';
+import { MBook } from '@models/Book';
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
-  const { books, loading, error, getBooksByTag } = useBooks();
+  const navigation = useNavigation<any>();  const { books, loading, error, getBooksByTag } = useBooks();
   const { user } = useAuth();
-  const [recentBooks, setRecentBooks] = useState<Book[]>([]);
-  const [popularBooks, setPopularBooks] = useState<Book[]>([]);
+  const [recentBooks, setRecentBooks] = useState<MBook[]>([]);
+  const [popularBooks, setPopularBooks] = useState<MBook[]>([]);
 
   useEffect(() => {
     if (books.length > 0) {
@@ -32,7 +31,7 @@ const HomeScreen: React.FC = () => {
     }
   }, [books]);
 
-  const handleBookPress = (book: Book) => {
+  const handleBookPress = (book: MBook) => {
     navigation.navigate('BookDetail', { book });
   };
 

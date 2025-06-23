@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Header from '../components/common/Header';
-import Button from '../components/common/Button';
-import Loading from '../components/common/Loading';
-import { colors } from '../theme/colors';
-import { Book } from '../../domain/models/Book';
-import useBooks from '../../shared/hooks/useBooks';
+import Header from '@components/common/Header';
+import Button from '@components/common/Button';
+import Loading from '@components/common/Loading';
+import { colors } from '@theme/colors';
+import { MBook } from '@models/Book';
+import useBooks from '@hooks/useBooks';
 
 type RouteParams = {
   BookDetail: {
-    book: Book;
+    book: MBook;
     bookId?: string;
   };
 };
@@ -20,7 +20,7 @@ const BookDetailScreen: React.FC = () => {
   const route = useRoute<RouteProp<RouteParams, 'BookDetail'>>();
   const { getBookById, getBookReadPosition } = useBooks();
 
-  const [book, setBook] = useState<Book | null>(route.params?.book || null);
+  const [book, setBook] = useState<MBook | null>(route.params?.book || null);
   const [loading, setLoading] = useState(!book);
   const [error, setError] = useState<string | null>(null);
   const [readPosition, setReadPosition] = useState<number | null>(null);

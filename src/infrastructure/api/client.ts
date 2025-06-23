@@ -55,12 +55,17 @@ export class ApiClient {  static async get<T>(url: string, params?: Record<strin
       }
       throw handleApiError(error);
     }
-  }
-  static async put<T>(url: string, data: any): Promise<T> {
+  }  static async put<T>(url: string, data: any): Promise<T> {
     try {
+      console.log(`🌐 PUT: ${url}`, data ? `Data: ${JSON.stringify(data)}` : '');
       const response = await apiClient.put<ApiResponse<T> | T>(url, data);
+      console.log(`✅ PUT response: ${url}`, response.status);
       return extractApiResponse<T>(response.data);
     } catch (error) {
+      console.error(`❌ PUT error: ${url}`, error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(`Status: ${error.response.status}`, error.response.data);
+      }
       throw handleApiError(error);
     }
   }

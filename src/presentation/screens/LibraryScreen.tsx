@@ -1,19 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BookCard from '../components/BookCard';
-import Loading from '../components/common/Loading';
-import Header from '../components/common/Header';
-import Button from '../components/common/Button';
-import { colors } from '../theme/colors';
-import useBooks from '../../shared/hooks/useBooks';
-import { Book } from '../../domain/models/Book';
+import BookCard from '@components/BookCard';
+import Loading from '@components/common/Loading';
+import Header from '@components/common/Header';
+import Button from '@components/common/Button';
+import { colors } from '@theme/colors';
+import useBooks from '@hooks/useBooks';
+import { MBook } from '@models/Book';
 
 const LibraryScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
-  const { books, loading, error, searchBooks } = useBooks();
+  const navigation = useNavigation<any>();  const { books, loading, error, searchBooks } = useBooks();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [searchResults, setSearchResults] = useState<MBook[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [currentView, setCurrentView] = useState<'grid' | 'list'>('grid');
 
@@ -39,11 +38,11 @@ const LibraryScreen: React.FC = () => {
     }
   }, [searchQuery, searchBooks]);
 
-  const handleBookPress = (book: Book) => {
+  const handleBookPress = (book: MBook) => {
     navigation.navigate('BookDetail', { book });
   };
 
-  const renderBook = ({ item }: { item: Book }) => (
+  const renderBook = ({ item }: { item: MBook }) => (
     <BookCard 
       book={item} 
       onPress={handleBookPress} 

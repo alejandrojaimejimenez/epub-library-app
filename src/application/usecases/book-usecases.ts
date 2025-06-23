@@ -1,70 +1,70 @@
-import { Book } from '../../domain/models/Book';
-import { BookService } from '../services/books';
+import { MBook, MReadPosition } from '../../domain/models/Book';
+import { SBooks } from '../services/books';
 
 export class GetBooksUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
-  async execute(): Promise<Book[]> {
+  async execute(): Promise<MBook[]> {
     return await this.bookService.getBooks();
   }
 }
 
 export class GetBookByIdUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
-  async execute(id: string): Promise<Book | null> {
+  async execute(id: string): Promise<MBook | null> {
     return await this.bookService.getBookById(id);
   }
 }
 
 export class SearchBooksUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
-  async execute(query: string): Promise<Book[]> {
+  async execute(query: string): Promise<MBook[]> {
     return await this.bookService.searchBooks(query);
   }
 }
 
 export class GetBooksByAuthorUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
-  async execute(authorName: string): Promise<Book[]> {
+  async execute(authorName: string): Promise<MBook[]> {
     return await this.bookService.getBooksByAuthor(authorName);
   }
 }
 
 export class GetBooksByTagUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
-  async execute(tagName: string): Promise<Book[]> {
+  async execute(tagName: string): Promise<MBook[]> {
     return await this.bookService.getBooksByTag(tagName);
   }
 }
 
 export class GetAuthorsUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
@@ -74,9 +74,9 @@ export class GetAuthorsUseCase {
 }
 
 export class GetTagsUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
@@ -86,9 +86,9 @@ export class GetTagsUseCase {
 }
 
 export class UpdateReadPositionUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
 
@@ -105,16 +105,15 @@ export class UpdateReadPositionUseCase {
 }
 
 export class GetReadPositionUseCase {
-  private bookService: BookService;
+  private bookService: SBooks;
 
-  constructor(bookService: BookService) {
+  constructor(bookService: SBooks) {
     this.bookService = bookService;
   }
-
   async execute(
     bookId: string,
     options?: { format?: string; user?: string; device?: string; }
-  ): Promise<any> {
+  ): Promise<MReadPosition | null> {
     return await this.bookService.getReadPosition(bookId, options);
   }
 }

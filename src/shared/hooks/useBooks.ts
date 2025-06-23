@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { LibraryContext } from '../context/LibraryContext';
-import { Book, ReadPosition } from '../../domain/models/Book';
+import { LibraryContext } from '@context/LibraryContext';
+import { MBook, MReadPosition } from '@models/Book';
 import {
   GetBookByIdUseCase,
   SearchBooksUseCase,
@@ -10,34 +10,34 @@ import {
   GetTagsUseCase,
   UpdateReadPositionUseCase,
   GetReadPositionUseCase
-} from '../../application/usecases/book-usecases';
-import { BookService } from '../../application/services/books';
-import { BookRepository } from '../../infrastructure/data/BookRepository';
+} from '@usecases/book-usecases';
+import { SBooks } from '@services/books';
+import { BookRepository } from '@data/BookRepository';
 
 interface UseBooksReturn {
     loading: boolean;
     error: Error | null;
-    books: Book[];
-    getBookById: (id: string) => Promise<Book | null>;
-    searchBooks: (query: string) => Promise<Book[]>;
-    getBooksByAuthor: (authorName: string) => Promise<Book[]>;
-    getBooksByTag: (tagName: string) => Promise<Book[]>;
+    books: MBook[];
+    getBookById: (id: string) => Promise<MBook | null>;
+    searchBooks: (query: string) => Promise<MBook[]>;
+    getBooksByAuthor: (authorName: string) => Promise<MBook[]>;
+    getBooksByTag: (tagName: string) => Promise<MBook[]>;
     getAuthors: () => Promise<{id: string, name: string}[]>;
     getTags: () => Promise<{id: string, name: string}[]>;
     updateLastReadPosition: (
         bookId: string, 
         position: number, 
-        cfi?: string, 
+        cfi?: string,
         format?: string,
         user?: string,
         device?: string
     ) => Promise<void>;
-    getBookReadPosition: (bookId: string, options?: { format?: string; user?: string; device?: string; }) => Promise<ReadPosition | null>;
+    getBookReadPosition: (bookId: string, options?: { format?: string; user?: string; device?: string; }) => Promise<MReadPosition | null>;
 }
 
 // Creamos las instancias necesarias para la inyección de dependencias
 const bookRepository = new BookRepository();
-const bookService = new BookService(bookRepository);
+const bookService = new SBooks(bookRepository);
 const getBookByIdUseCase = new GetBookByIdUseCase(bookService);
 const searchBooksUseCase = new SearchBooksUseCase(bookService);
 const getBooksByAuthorUseCase = new GetBooksByAuthorUseCase(bookService);
@@ -48,10 +48,9 @@ const updateReadPositionUseCase = new UpdateReadPositionUseCase(bookService);
 const getReadPositionUseCase = new GetReadPositionUseCase(bookService);
 
 const useBooks = (): UseBooksReturn => {
-    const { books: contextBooks, loading: contextLoading, error: contextError } = useContext(LibraryContext);
-    const [loading, setLoading] = useState<boolean>(true);
+    const { books: contextBooks, loading: contextLoading, error: contextError } = useContext(LibraryContext);    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
-    const [books, setBooks] = useState<Book[]>([]);
+    const [books, setBooks] = useState<MBook[]>([]);
       useEffect(() => {
         // Si tenemos los libros desde el contexto, los usamos
         if (contextBooks && contextBooks.length > 0) {
@@ -91,10 +90,8 @@ const useBooks = (): UseBooksReturn => {
         };
 
         loadBooks();
-    }, [contextBooks]);
-
-    // Función para obtener un libro por ID
-    const getBookById = useCallback(async (id: string): Promise<Book | null> => {
+    }, [contextBooks]);    // Función para obtener un libro por ID
+    const getBookById = useCallback(async (id: string): Promise<MBook | null> => {
         try {
             const book = await getBookByIdUseCase.execute(id);
             return book;
@@ -105,17 +102,16 @@ const useBooks = (): UseBooksReturn => {
     }, []);
 
     // Función para buscar libros
-    const searchBooks = useCallback(async (query: string): Promise<Book[]> => {
+    const searchBooks = useCallback(async (query: string): Promise<MBook[]> => {
         try {
             return await searchBooksUseCase.execute(query);
         } catch (err) {
-            setError(err instanceof Error ? err : new Error(`Error searching for "${query}"`));
-            return [];
+            setError(err instanceof Error ? err : new Error(`Error searching for "${query}"`));            return [];
         }
     }, []);
 
     // Función para obtener libros por autor
-    const getBooksByAuthor = useCallback(async (authorName: string): Promise<Book[]> => {
+    const getBooksByAuthor = useCallback(async (authorName: string): Promise<MBook[]> => {
         try {
             return await getBooksByAuthorUseCase.execute(authorName);
         } catch (err) {
@@ -125,7 +121,7 @@ const useBooks = (): UseBooksReturn => {
     }, []);
 
     // Función para obtener libros por etiqueta
-    const getBooksByTag = useCallback(async (tagName: string): Promise<Book[]> => {
+    const getBooksByTag = useCallback(async (tagName: string): Promise<MBook[]> => {
         try {
             return await getBooksByTagUseCase.execute(tagName);
         } catch (err) {
@@ -181,9 +177,7 @@ const useBooks = (): UseBooksReturn => {
             }
             // No establecemos el error global para no mostrar mensajes al usuario
         }
-    }, []);
-
-    // Función para obtener la posición de lectura guardada
+    }, []);    // Función para obtener la posición de lectura guardada
     const getBookReadPosition = useCallback(async (
         bookId: string,
         options?: {
@@ -191,7 +185,7 @@ const useBooks = (): UseBooksReturn => {
             user?: string;
             device?: string;
         }
-    ): Promise<ReadPosition | null> => {
+    ): Promise<MReadPosition | null> => {
         try {
             return await getReadPositionUseCase.execute(bookId, options);
         } catch (err) {

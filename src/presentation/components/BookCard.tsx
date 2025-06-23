@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Book } from '../../domain/models/Book';
+import { MBook } from '../../domain/models/Book';
 import { colors } from '../theme/colors';
 
 interface BookCardProps {
-  book: Book;
-  onPress: (book: Book) => void;
+  book: MBook;
+  onPress: (book: MBook) => void;
   style?: any;
 }
 

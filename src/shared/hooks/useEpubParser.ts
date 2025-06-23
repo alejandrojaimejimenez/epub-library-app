@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
-import { LoadEpubUseCase } from '../../application/usecases/epub-usecases';
-import { EpubService } from '../../application/services/epub';
-import { EpubRepository } from '../../infrastructure/data/EpubRepository';
+import { LoadEpubUseCase } from '@usecases/epub-usecases';
+import { SEpub } from '@services/epub';
+import { EpubRepository } from '@data/EpubRepository';
 
 // Creamos las instancias necesarias para la inyección de dependencias
 const epubRepository = new EpubRepository();
-const epubService = new EpubService(epubRepository);
+const epubService = new SEpub(epubRepository);
 const loadEpubUseCase = new LoadEpubUseCase(epubService);
 
 interface UseEpubParserReturn {

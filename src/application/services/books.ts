@@ -1,30 +1,29 @@
-import { Book, ReadPosition } from '../../domain/models/Book';
-import { IBookRepository } from '../../domain/repositories/IBookRepository';
+import { MBook, MReadPosition } from '@models/Book';
+import { IBookRepository } from '@repositories/IBookRepository';
 
-export class BookService {
+export class SBooks {
   private bookRepository: IBookRepository;
 
   constructor(bookRepository: IBookRepository) {
     this.bookRepository = bookRepository;
   }
-
-  async getBooks(): Promise<Book[]> {
+  async getBooks(): Promise<MBook[]> {
     return await this.bookRepository.getBooks();
   }
 
-  async getBookById(id: string): Promise<Book | null> {
+  async getBookById(id: string): Promise<MBook | null> {
     return await this.bookRepository.getBookById(id);
   }
 
-  async searchBooks(query: string): Promise<Book[]> {
+  async searchBooks(query: string): Promise<MBook[]> {
     return await this.bookRepository.searchBooks(query);
   }
 
-  async getBooksByAuthor(authorName: string): Promise<Book[]> {
+  async getBooksByAuthor(authorName: string): Promise<MBook[]> {
     return await this.bookRepository.getBooksByAuthor(authorName);
   }
 
-  async getBooksByTag(tagName: string): Promise<Book[]> {
+  async getBooksByTag(tagName: string): Promise<MBook[]> {
     return await this.bookRepository.getBooksByTag(tagName);
   }
 
@@ -46,11 +45,10 @@ export class BookService {
   ): Promise<void> {
     await this.bookRepository.updateReadPosition(bookId, position, cfi, format, user, device);
   }
-
   async getReadPosition(
     bookId: string,
     options?: { format?: string; user?: string; device?: string; }
-  ): Promise<ReadPosition | null> {
+  ): Promise<MReadPosition | null> {
     return await this.bookRepository.getReadPosition(bookId, options);
   }
 }

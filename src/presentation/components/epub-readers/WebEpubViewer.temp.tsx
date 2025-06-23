@@ -25,7 +25,7 @@ interface WebEpubViewerProps {
   defaultFontFamily?: string;
 }
 
-export interface WebEpubViewerRef {
+interface WebEpubViewerRef {
   nextPage: () => void;
   prevPage: () => void;
   setLocation: (location: string) => void;
@@ -65,19 +65,12 @@ const convertToEpubBook = (book: any): EpubBook => {
   return {
     renderTo: (element: HTMLElement, options: any) => {
       const rendition = book.renderTo(element, options);
-      // Nos aseguramos de que todas las funciones necesarias estén disponibles
-      const enhancedRendition = {
+      return {
         ...rendition,
-        display: rendition.display.bind(rendition),
-        next: rendition.next.bind(rendition),
-        prev: rendition.prev.bind(rendition),
-        themes: rendition.themes,
-        on: rendition.on.bind(rendition),
-        off: rendition.off.bind(rendition),
-        currentLocation: rendition.currentLocation.bind(rendition),
-        manager: rendition.manager
+        off: (event: string, callback?: (data: any) => void) => {
+          rendition.off(event, callback);
+        }
       };
-      return enhancedRendition;
     },
     destroy: () => book.destroy(),
     on: (event: string, callback: (error: Error) => void) => book.on(event, callback),

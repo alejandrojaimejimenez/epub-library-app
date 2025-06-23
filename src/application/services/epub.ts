@@ -1,6 +1,6 @@
-import { IEpubRepository } from '../../domain/repositories/IEpubRepository';
+import { IEpubRepository } from '@repositories/IEpubRepository';
 
-export class EpubService {
+export class SEpub {
   private epubRepository: IEpubRepository;
 
   constructor(epubRepository: IEpubRepository) {

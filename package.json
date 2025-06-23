@@ -47,9 +47,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
     "@types/react": "~18.2.45",
     "@types/react-dom": "~18.0.10",
-    "@types/uuid": "^10.0.0"
+    "@types/uuid": "^10.0.0",
+    "babel-plugin-module-resolver": "^5.0.2"
   },
   "main": "node_modules/expo/AppEntry.js",
   "homepage": "https://github.com/yourusername/epub-library-app",

@@ -1,4 +1,4 @@
-import { ApiResponse, ApiError } from '../../domain/models/Api';
+import { ApiResponse, ApiError } from '@models/Api';
 
 /**
  * Extrae los datos de una respuesta de API

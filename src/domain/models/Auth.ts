@@ -1,21 +1,21 @@
-export interface User {
+export interface MUser {
   id: number;
   username: string;
   email: string;
 }
 
-export interface LoginCredentials {
+export interface MLoginCredentials {
   username: string;
   password: string;
 }
 
-export interface RegisterData {
+export interface MRegisterData {
   username: string;
   email: string;
   password: string;
 }
 
-export interface AuthResponse {
+export interface MAuthResponse {
   token: string;
-  user: User;
+  user: MUser;
 }

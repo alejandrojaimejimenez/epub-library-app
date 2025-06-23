@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, BackHandler, Platform, Text, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import EpubReader from '../components/EpubReader';
-import Loading from '../components/common/Loading';
-import { colors } from '../theme/colors';
-import useBooks from '../../shared/hooks/useBooks';
-import { Book } from '../../domain/models/Book';
+import EpubReader from '@components/EpubReader';
+import Loading from '@components/common/Loading';
+import { colors } from '@theme/colors';
+import useBooks from '@hooks/useBooks';
+import { MBook } from '@models/Book';
 
 type RouteParams = {
   Reader: {
-    book: Book;
+    book: MBook;
     initialPosition?: number;
     initialCfi?: string;
   };

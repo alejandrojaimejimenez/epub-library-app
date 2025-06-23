@@ -1,33 +1,32 @@
 // Define las interfaces principales del dominio de la aplicación
 
-export interface Author {
+export interface MAuthor {
   id: number;
   name: string;
   sort: string;
   link: string;
 }
 
-export interface Tag {
+export interface MTag {
   id: number;
   name: string;
   link: string;
 }
 
-export interface Series {
+export interface MSeries {
   id: number;
   name: string;
   sort: string;
   link: string;
 }
 
-export interface Book {
+export interface MBook {
   id: number;
   title: string;
   sort: string;
   timestamp: string;
   pubdate?: string;
-  series_index?: number;
-  author_sort: string;
+  series_index?: number;  author_sort: string;
   isbn?: string;
   lccn?: string;
   path: string;
@@ -35,19 +34,18 @@ export interface Book {
   uuid: string;
   has_cover: number;
   last_modified: string;
-  authors?: Author[];
-  tags?: Tag[];
-  series?: Series;
+  authors?: MAuthor[];
+  tags?: MTag[];
+  series?: MSeries;
   comments?: string;
   formats?: string[];
   cover_path?: string;  // Campos adicionales para nuestra aplicación
   coverImage?: string;
-  filePath?: string;
-  lastReadPosition?: number;
+  filePath?: string;  lastReadPosition?: number;
   lastReadCfi?: string;
 }
 
-export interface ReadPosition {
+export interface MReadPosition {
   bookId: string;
   position: number;
   cfi?: string;

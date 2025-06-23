@@ -1,20 +1,25 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { User, LoginCredentials, RegisterData } from '../../domain/models/Auth';
-import { AuthService } from '../../application/services/auth';
-import { getAuthToken, setAuthToken, setUserData, getUserData, clearAuthData } from '../utils/authStorage';
+import { MUser, MLoginCredentials, MRegisterData } from '@models/Auth';
+import { SAuth } from '@services/auth';
+import { AuthRepository } from '@data/AuthRepository';
+import { getAuthToken, setAuthToken, setUserData, getUserData, clearAuthData } from '@utils/authStorage';
 
 // Define el tipo para el contexto de autenticación
 export interface AuthContextType {
-  user: User | null;
+  user: MUser | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (credentials: MLoginCredentials) => Promise<void>;
+  register: (data: MRegisterData) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
+
+// Inicializa el servicio de autenticación con el patrón de inyección de dependencias
+const authRepository = new AuthRepository();
+const authService = new SAuth(authRepository);
 
 // Crea el contexto
 export const AuthContext = createContext<AuthContextType>({
@@ -34,7 +39,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<MUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,11 +73,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUser();
   }, []);
   // Función para iniciar sesión
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: MLoginCredentials) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await AuthService.login(credentials);
+      const response = await authService.login(credentials);
       // Comprobamos que la respuesta tiene la estructura esperada
       if (!response || !response.token || !response.user) {
         throw new Error('Respuesta de autenticación inválida');
@@ -91,11 +96,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
   // Función para registrar un nuevo usuario
-  const register = async (data: RegisterData) => {
+  const register = async (data: MRegisterData) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await AuthService.register(data);
+      const response = await authService.register(data);
       // Comprobamos que la respuesta tiene la estructura esperada
       if (!response || !response.token || !response.user) {
         throw new Error('Respuesta de registro inválida');
@@ -113,11 +118,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
-
   // Función para cerrar sesión
   const logout = async () => {
     setIsLoading(true);
     try {
+      await authService.logout(); // Ahora llamamos al método del servicio
       await clearAuthData();
       setUser(null);
       setToken(null);

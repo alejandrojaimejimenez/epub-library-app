@@ -60,8 +60,7 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
     addLog(`ERROR: ${errorMsg}`);
     setError(errorObj);
     setIsLoading(false);
-  }, [addLog]);
-  // Manejar cambios de ubicación
+  }, [addLog]);  // Manejar cambios de ubicación
   const handleLocationChange = useCallback((location: string) => {
     // Ignorar valores nulos o indefinidos
     if (!location) {
@@ -70,22 +69,41 @@ const EpubReader = React.forwardRef<EpubReaderRef, EpubReaderProps>(({
     }
     
     addLog(`Nueva ubicación: ${location}`);
+    
+    // Informar al componente padre del cambio de ubicación
     if (onLocationChange) {
       onLocationChange(location);
     }
     
-    try {
-      // Actualizar la posición en el almacenamiento
-      // Convertimos el CFI a un número hash para almacenamiento
-      const locationHash = Math.abs(location.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0));
+    try {      // Determinar si estamos trabajando con un CFI estándar o un identificador basado en href
+      const isCfi = location.startsWith('epubcfi(');
       
-      addLog(`Guardando posición con hash: ${locationHash}`);
-      updateLastReadPosition(bookId, locationHash);
+      // Si no es un CFI estándar, podríamos necesitar manejarlo de forma diferente
+      if (!isCfi) {
+        addLog(`Advertencia: La ubicación no es un CFI estándar: ${location}`);
+      }
+      
+      // Posición numérica (0 para posiciones iniciales o calcular basado en índice)
+      // Para simplificar, usaremos 0 como se muestra en tu ejemplo de cURL
+      const position = 0;
+      
+      addLog(`Actualizando posición en API: bookId=${bookId}, posición=${position}, cfi=${location}`);
+      
+      // Llamar a la API para actualizar la posición
+      updateLastReadPosition(bookId, position, location, 'EPUB', 'usuario1', 'browser')
+        .then(() => {
+          addLog('✅ Posición actualizada correctamente en API');
+        })
+        .catch((error) => {
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          addLog(`❌ Error al actualizar posición en API: ${errorMsg}`);
+          // Registrar detalles adicionales para depuración
+          console.error('Error completo:', error);
+        });
     } catch (error) {
-      addLog(`ERROR al guardar posición: ${error instanceof Error ? error.message : String(error)}`);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      addLog(`❌ ERROR al procesar cambio de posición: ${errorMsg}`);
+      console.error('Error al guardar posición de lectura:', error);
     }
   }, [bookId, onLocationChange, updateLastReadPosition, addLog]);
 

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MUser } from '@models/Auth';
 
 // Constantes para las claves de almacenamiento
 export const STORAGE_KEYS = {
@@ -32,11 +33,11 @@ export const removeAuthToken = async (): Promise<void> => {
 };
 
 // Funciones para manejar los datos del usuario
-export const setUserData = async (userData: any): Promise<void> => {
+export const setUserData = async (userData: MUser): Promise<void> => {
   await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
 };
 
-export const getUserData = async (): Promise<any | null> => {
+export const getUserData = async (): Promise<MUser | null> => {
   try {
     const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
     console.log('👤 getUserData:', data ? 'Datos encontrados' : 'No hay datos');
