@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BookList from '@components/BookList';
+import { BookList } from '@components/organisms';
 import Loading from '@components/common/Loading';
 import Header from '@components/common/Header';
 import LogoutButton from '@components/common/LogoutButton';
@@ -30,9 +30,8 @@ const HomeScreen: React.FC = () => {
       setPopularBooks(sorted.slice(0, 10));
     }
   }, [books]);
-
   const handleBookPress = (book: MBook) => {
-    navigation.navigate('BookDetail', { book });
+    navigation.navigate('BookDetail', { bookId: book.id.toString() });
   };
 
   const navigateToLibrary = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BookCard from '@components/BookCard';
+import { BookCard } from '@components/molecules';
 import Loading from '@components/common/Loading';
 import Header from '@components/common/Header';
 import Button from '@components/common/Button';
@@ -37,9 +37,8 @@ const LibraryScreen: React.FC = () => {
       setIsSearching(false);
     }
   }, [searchQuery, searchBooks]);
-
   const handleBookPress = (book: MBook) => {
-    navigation.navigate('BookDetail', { book });
+    navigation.navigate('BookDetail', { bookId: book.id.toString() });
   };
 
   const renderBook = ({ item }: { item: MBook }) => (

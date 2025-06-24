@@ -15,8 +15,8 @@ import { MBook } from '@models/Book';
 // Define los tipos de parámetros para las rutas
 export type RootStackParamList = {
   TabNavigator: undefined;
-  BookDetail: { book: MBook } | { bookId: string };
-  Reader: { book: MBook; initialPosition?: number; initialCfi?: string };
+  BookDetail: { bookId: string } | { book: MBook };
+  Reader: { bookId: string; initialPosition?: number; initialCfi?: string } | { book: MBook; initialPosition?: number; initialCfi?: string };
 };
 
 export type TabParamList = {
@@ -43,14 +43,13 @@ const TabNavigator = () => {
         tabBarActiveTintColor: '#2E7D32',
         tabBarInactiveTintColor: '#757575',
       }}
-    >{/* Eliminamos posibles espacios en blanco entre las etiquetas */}
+    >
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
         options={{ 
           title: 'Inicio',
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            // Utiliza iconos adecuados para tu app
             <TabIcon name="home" color={color} size={size} />
           )
         }} 
@@ -83,16 +82,21 @@ const AppNavigator = () => {
   return (    <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        cardStyle: {
+          // El estilo de la tarjeta ahora incluye pointerEvents como parte del estilo,
+          // no como propiedad independiente
+          pointerEvents: 'auto',
+        }
       }}
       initialRouteName="TabNavigator"
-    >{/* Eliminamos posibles espacios en blanco entre las etiquetas */}
+    >
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name="BookDetail" component={BookDetailScreen} />
       <Stack.Screen 
         name="Reader" 
         component={ReaderScreen} 
         options={{ 
-          gestureEnabled: false, // Deshabilitamos el gesto de retroceso para evitar salir accidentalmente
+          gestureEnabled: false,
         }} 
       />
     </Stack.Navigator>

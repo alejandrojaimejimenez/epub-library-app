@@ -1,6 +1,12 @@
-import { IEpubRepository, IEpubFile } from '@repositories/IEpubRepository';
+import { IEpubRepository } from '@repositories/IEpubRepository';
 import { API_ENDPOINTS } from '@api/endpoints';
 import { getAuthToken } from '@utils/authStorage';
+
+interface IEpubFile {
+  url: string;
+  blob: Blob;
+  arrayBuffer: ArrayBuffer;
+}
 
 export class EpubRepository implements IEpubRepository {
   async loadEpub(file: string): Promise<IEpubFile> {
@@ -58,9 +64,10 @@ export class EpubRepository implements IEpubRepository {
         if (!contentType || (!contentType.includes('application/epub+zip') && !contentType.includes('application/octet-stream'))) {
           console.warn(`Tipo de contenido inesperado: ${contentType}. Se esperaba application/epub+zip`);
         }
-          // Obtener el blob del EPUB
+        
+        // Obtener el blob del EPUB
         const blob = await response.blob();
-        console.log('EPUB recibido como blob, tamaño:', blob.size, 'bytes, tipo:', blob.type);
+        console.log('EPUB recibido como blob, tamaño:', blob.size);
         
         if (blob.size === 0) {
           throw new Error('El archivo EPUB recibido está vacío');
@@ -68,22 +75,11 @@ export class EpubRepository implements IEpubRepository {
         
         if (blob.size < 1000) {
           console.warn('El archivo EPUB es sospechosamente pequeño:', blob.size, 'bytes');
-          // A pesar de la advertencia, continuamos para ver si es válido
         }
         
-        // Validar tipo MIME y contenido
-        let mimeType = blob.type;
-        if (!mimeType || 
-            (!mimeType.includes('application/epub+zip') && 
-             !mimeType.includes('application/octet-stream') && 
-             !mimeType.includes('application/x-cbz'))) {
-          console.warn(`Tipo MIME no reconocido: ${mimeType}. Forzando tipo a application/epub+zip`);
-          mimeType = 'application/epub+zip';
-        }
-        
-        // Crear una URL para el blob con el tipo MIME correcto
-        const blobUrl = URL.createObjectURL(new Blob([blob], { type: mimeType }));
-        console.log('Blob URL creada:', blobUrl.substring(0, 50), '...');
+        // Crear una URL para el blob - asegurándonos que tiene el tipo MIME correcto
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/epub+zip' }));
+        console.log('Blob URL creada:', blobUrl);
         
         // Devolver objeto con URL y blob para el EPUB
         return {

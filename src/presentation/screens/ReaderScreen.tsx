@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, BackHandler, Platform, Text, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import EpubReader from '@components/EpubReader';
-import Loading from '@components/common/Loading';
-import { colors } from '@theme/colors';
+import { EpubReader } from '@presentation/components/features';
+import { Loading } from '@presentation/components/atoms';
+import { useTheme } from '@presentation/theme/useTheme';
 import useBooks from '@hooks/useBooks';
 import { MBook } from '@models/Book';
 
 type RouteParams = {
   Reader: {
-    book: MBook;
+    book?: MBook;
+    bookId?: string;
     initialPosition?: number;
     initialCfi?: string;
   };
@@ -18,17 +19,50 @@ type RouteParams = {
 const ReaderScreen: React.FC = () => {
   const route = useRoute<RouteProp<RouteParams, 'Reader'>>();
   const navigation = useNavigation();
-  const { updateLastReadPosition } = useBooks();
-  
+  const { updateLastReadPosition, getBookById } = useBooks();
+  const { colors, spacing } = useTheme();
   // El estado de carga se inicia como false porque la carga real se gestiona en EpubReader
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(route.params.bookId ? true : false);
   const [error, setError] = useState<string | null>(null);
   const [currentCfi, setCurrentCfi] = useState<string | undefined>(undefined);
+  const [book, setBook] = useState<MBook | undefined>(route.params.book);
   
-  const { book, initialPosition, initialCfi } = route.params;
+  const { initialPosition, initialCfi, bookId } = route.params;  // Cargar el libro si se proporciona bookId
   useEffect(() => {
-    // Configurar el título de la pantalla
-    navigation.setOptions({ title: book.title });
+    const loadBookData = async () => {
+      if (bookId && !book) {
+        try {
+          setLoading(true);
+          const loadedBook = await getBookById(bookId);
+          if (loadedBook) {
+            setBook(loadedBook);
+          } else {
+            setError('No se pudo cargar el libro');
+          }
+        } catch (err) {
+          setError(`Error al cargar el libro: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadBookData();
+  }, [bookId, book, getBookById]);
+  // Función para salir del lector
+  const handleExit = useCallback(() => {
+    if (book?.id && currentCfi) {
+      // Guardar la posición actual antes de salir
+      saveReadingPosition(currentCfi);
+    }
+    navigation.goBack();
+  }, [book?.id, currentCfi, navigation]);
+  
+  useEffect(() => {
+    if (book?.title) {
+      // Configurar el título de la pantalla
+      navigation.setOptions({ title: book.title });
+    }
     
     // Intercepción del botón de retroceso (solo en plataformas nativas)
     if (Platform.OS !== 'web') {
@@ -51,10 +85,10 @@ const ReaderScreen: React.FC = () => {
       // window.addEventListener('popstate', handleWebBack);
       // return () => window.removeEventListener('popstate', handleWebBack);
     }
-  }, [book, navigation]);
-
-  // Función para guardar la posición de lectura actual
+  }, [book, navigation, handleExit]);  // Función para guardar la posición de lectura actual
   const saveReadingPosition = useCallback(async (cfi: string) => {
+    if (!book?.id) return;
+    
     try {
       await updateLastReadPosition(
         book.id.toString(),
@@ -64,8 +98,7 @@ const ReaderScreen: React.FC = () => {
     } catch (err) {
       console.error('Error al guardar posición de lectura:', err);
     }
-  }, [book.id, updateLastReadPosition]);
-
+  }, [book?.id, updateLastReadPosition]);
   // Manejar cambios en la posición de lectura
   const handleLocationChange = useCallback((cfi: string) => {
     setCurrentCfi(cfi);
@@ -74,38 +107,36 @@ const ReaderScreen: React.FC = () => {
   }, [saveReadingPosition]);
 
   // Manejar la salida del lector
-  const handleExit = useCallback(() => {
-    if (currentCfi) {
-      saveReadingPosition(currentCfi);
-    }
-    navigation.goBack();
-  }, [currentCfi, navigation, saveReadingPosition]);
+  // const handleExit = useCallback(() => {
+  //   if (currentCfi) {
+  //     saveReadingPosition(currentCfi);
+  //   }
+  //   navigation.goBack();
+  // }, [currentCfi, navigation, saveReadingPosition]);
   if (loading) {
     return <Loading text="Preparando el libro..." />;
   }
 
   if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+    return (      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
+        <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, { backgroundColor: colors.primary }]} 
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.buttonText}>Volver atrás</Text>
+          <Text style={[styles.buttonText, { color: colors.textLight }]}>Volver atrás</Text>
         </TouchableOpacity>
       </View>
     );
   }
-
-  return (
-    <View style={styles.container}>
-      <EpubReader
-        url={book.filePath || `${book.id}`}
-        bookId={book.id.toString()}
-        initialLocation={initialCfi}
-        onLocationChange={handleLocationChange}
-      />
+  return (    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {book && (
+        <EpubReader
+          bookId={book.id.toString()}
+          initialCfi={initialCfi}
+          onLocationChange={handleLocationChange}
+        />
+      )}
     </View>
   );
 };
@@ -113,30 +144,25 @@ const ReaderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: colors.background,
   },
   errorText: {
-    color: colors.error,
     textAlign: 'center',
     fontSize: 16,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 16,
   },
   buttonText: {
-    color: colors.textLight,
     fontSize: 16,
     fontWeight: 'bold',
   },

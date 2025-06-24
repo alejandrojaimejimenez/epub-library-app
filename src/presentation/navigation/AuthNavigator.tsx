@@ -46,10 +46,13 @@ const AuthNavigator: React.FC = () => {
     hasError: !!error
   });
 
-  return (
-    <Stack.Navigator
+  return (    <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        // Corregimos el problema con pointerEvents moviéndolo a styles
+        cardStyle: {
+          // Se aplican estilos pero no se usa la prop pointerEvents directamente
+        }
       }}
     >
       {isAuthenticated ? (

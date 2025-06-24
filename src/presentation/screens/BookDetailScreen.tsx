@@ -65,16 +65,11 @@ const BookDetailScreen: React.FC = () => {
     };
 
     fetchReadPosition();
-  }, [book, getBookReadPosition]);
-  const handleStartReading = () => {
+  }, [book, getBookReadPosition]);  const handleStartReading = () => {
     if (book) {
       console.log(`Iniciando lectura del libro ${book.id} con posición:`, readPosition);
       navigation.navigate('Reader', { 
-        book: {
-          id: book.id,
-          title: book.title,
-          authors: book.authors
-        }, 
+        bookId: book.id.toString(),
         initialPosition: readPosition
       });
     }
@@ -170,8 +165,7 @@ const BookDetailScreen: React.FC = () => {
               {book.pubdate ? new Date(book.pubdate).toLocaleDateString() : 'Desconocida'}
             </Text>
           </View>
-          
-          {book.isbn && (
+            {book.isbn && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>ISBN:</Text>
               <Text style={styles.detailValue}>{book.isbn}</Text>
@@ -181,7 +175,9 @@ const BookDetailScreen: React.FC = () => {
           {book.formats && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Formatos:</Text>
-              <Text style={styles.detailValue}>{book.formats.join(', ')}</Text>
+              <Text style={styles.detailValue}>
+                {book.formats ? book.formats.join(', ') : 'No disponible'}
+              </Text>
             </View>
           )}
         </View>

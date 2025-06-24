@@ -32,8 +32,18 @@ const linking: LinkingOptions<RootStackParamList> = {
           Library: 'library',
         }
       },
-      BookDetail: 'book/:bookId',
-      Reader: 'read/:bookId',
+      BookDetail: {
+        path: 'book/:bookId',
+        parse: {
+          bookId: (bookId: string) => String(bookId),
+        },
+      },
+      Reader: {
+        path: 'book/:bookId/read',
+        parse: {
+          bookId: (bookId: string) => String(bookId),
+        },
+      }
     }
   },
   // Añadimos listeners de depuración
@@ -50,7 +60,8 @@ const App: React.FC = () => {
     <SafeAreaProvider>
       <AuthProvider>
         <LibraryProvider>
-          <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />          <NavigationContainer
+          <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />
+          <NavigationContainer
             linking={linking}
             fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Text>Cargando aplicación...</Text>

@@ -46,36 +46,123 @@ Contiene implementaciones técnicas y comunicación con servicios externos.
    - **`data/`**: Capa de acceso a datos.
      - `BookRepository.ts`: Implementación del repositorio de libros.
      - `EpubRepository.ts`: Implementación del repositorio de EPUBs.
+   - **`mqtt/`**: Comunicación en tiempo real.
+     - **`Listeners/`**: Escuchadores de eventos MQTT.
+   - **`notifications/`**: Gestión de notificaciones push.
    - **`storage/`**: Almacenamiento local persistente.
 
 #### 4. **`presentation/`** 
-Contiene todos los componentes relacionados con la interfaz de usuario.
-   - **`components/`**: Componentes reutilizables de UI.
-     - `BookCard.tsx`: Tarjeta para mostrar información de un libro.
-     - `BookList.tsx`: Lista de libros.
-     - `EpubReader.tsx`: Componente para leer EPUBs.
-     - `common/`: Componentes básicos reutilizables.
-   - **`navigation/`**: Configuración de rutas y navegación.
-     - `AppNavigator.tsx`: Navegador principal de la aplicación.
+Contiene toda la capa de presentación y componentes de UI.
+   - **`components/`**: Componentes React organizados según Atomic Design.
+     - **`atoms/`**: Componentes básicos e indivisibles.
+       - `Button`: Botón reutilizable con varios estilos.
+       - `Loading`: Indicador de carga.
+       - `LoadingIndicator`: Indicador de carga simple.
+       - `DebugInfo`: Panel de depuración para desarrollo.
+     - **`molecules/`**: Componentes que combinan átomos.
+       - `BookCard`: Tarjeta que muestra información de un libro.
+       - `Header`: Encabezado de la aplicación.
+       - `LogoutButton`: Botón para cerrar sesión.
+     - **`organisms/`**: Componentes más complejos que combinan moléculas.
+       - `BookList`: Lista de libros con funcionalidad completa.     - **`features/`**: Características completas de la aplicación.
+       - `EpubReader/`: Característica completa del lector EPUB.
+         - `components/`: Componentes específicos del lector.
+           - `EpubReader.tsx`: Componente principal que selecciona el lector adecuado.
+           - `EpubReaderDevices.tsx`: Implementación para dispositivos móviles.
+           - `EpubReaderWeb/`: Implementación para entorno web.
+             - `EpubReaderWeb.tsx`: Componente principal.
+             - `EpubReaderWebContainer.tsx`: Lógica del componente.
+             - `EpubReaderWebView.tsx`: Vista del componente.
+             - `styles.ts`: Estilos.
+             - `types.ts`: Tipos e interfaces.
+         - `hooks/`: Hooks personalizados para el lector.
+           - `useEpubReader.ts`: Hook principal para gestionar el lector.
+           - `useBookReader.ts`: Hook para gestionar libros.
+   - **`navigation/`**: Configuración y componentes de navegación.
    - **`screens/`**: Pantallas principales de la aplicación.
-     - `HomeScreen.tsx`: Pantalla principal.
-     - `LibraryScreen.tsx`: Pantalla de biblioteca.
-     - `BookDetailScreen.tsx`: Pantalla de detalle de libro.
-     - `ReaderScreen.tsx`: Pantalla de lector de EPUB.
-   - **`theme/`**: Definición de estilos, temas y configuración visual.
-     - `colors.ts`: Paleta de colores de la aplicación.
+   - **`theme/`**: Definición del tema visual (colores, tipografía, espaciado).
 
-#### 5. **`shared/`** 
-Contiene utilidades y código compartido entre capas.
-   - **`constants/`**: Constantes utilizadas en toda la aplicación.
-   - **`context/`**: Contextos de React para el estado global.
-     - `LibraryContext.tsx`: Contexto para gestionar la biblioteca de libros.
-   - **`hooks/`**: Hooks personalizados de React.
-     - `useBooks.ts`: Hook para operaciones con libros.
-     - `useEpubParser.ts`: Hook para manejo de archivos EPUB.
-   - **`types/`**: Definiciones de tipos TypeScript.
-   - **`utils/`**: Funciones de utilidad genéricas.
-     - `apiHelpers.ts`: Utilidades para manejar respuestas y errores de API.
+### Guía de Desarrollo de Componentes
+
+#### Estructura de un Componente
+
+Cada componente debería seguir esta estructura de carpetas:
+
+```
+ComponentName/
+  - ComponentName.tsx       # Implementación del componente
+  - index.tsx               # Archivo de exportación
+  - ComponentName.test.tsx  # Pruebas (opcional)
+  - styles.ts               # Estilos (opcional)
+  - types.ts                # Tipos e interfaces (opcional)
+```
+
+#### Reglas para el Desarrollo de Componentes
+
+1. **Separación de Responsabilidades**:
+   - Los componentes deben tener una única responsabilidad.
+   - Componentes con más de 150 líneas deberían subdividirse.
+
+2. **Tipado Estricto**:
+   - Todas las props deben estar correctamente tipadas.
+   - Evitar el uso de `any`.
+
+3. **Uso del Theme**:
+   - Usar `useTheme()` para acceder a colores, espaciado y tipografía.
+   - Evitar valores hardcodeados.
+
+4. **Patrones de Importación**:
+   - Usar imports con alias para mejorar la legibilidad.
+   - Ejemplo: `import { Button } from '@components/atoms';`
+
+5. **Componentes Reutilizables**:
+   - Los componentes básicos deben ser altamente reutilizables.
+   - Utilizar props para personalizar apariencia y comportamiento.
+
+6. **Dependencias entre Capas**:
+   - Átomos: No pueden depender de otros componentes.
+   - Moléculas: Pueden usar átomos, pero no organismos ni features.
+   - Organismos: Pueden usar átomos y moléculas.
+   - Features: Pueden usar cualquier componente.
+
+7. **Pruebas**:
+   - Componentes críticos deben tener pruebas unitarias.
+   - Enfocarse en probar comportamiento, no implementación.
+
+## Guías de Implementación
+
+### Dirección de Dependencias
+Las dependencias siempre deben apuntar hacia el centro (desde infraestructura hacia dominio), nunca al revés.
+
+### Importaciones Permitidas
+- **Dominio**: Solo puede importar de domain y shared.
+- **Aplicación**: Puede importar de domain, application y shared.
+- **Infraestructura**: Puede importar de domain, application, infrastructure y shared.
+- **Presentación**: Puede importar de cualquier capa.
+- **Shared**: Solo debe importar dentro de shared.
+
+### Convenciones de Nombrado
+- **Servicios**: Prefijo S (ej: SBookService)
+- **Modelos**: Prefijo M (ej: MBook)
+- **Interfaces**: Prefijo I (ej: IBookRepository)
+- **Componentes React**: PascalCase sin prefijo
+- **Constantes**: UPPER_CASE
+
+### Diseño de Componentes
+- Usar el patrón Container/Presentational para componentes complejos
+- Seguir el principio de responsabilidad única
+- Utilizar el sistema de temas para estilos consistentes
+- Mantener componentes por debajo de 200 líneas
+
+### Estilos
+- Utilizar `useTheme()` para acceder a variables de tema
+- Evitar valores hardcodeados de colores, espaciados, etc.
+- Definir estilos en archivos separados
+
+### Estado
+- Estado local simple: `useState`
+- Estado complejo: `useReducer`
+- Estado global: Contextos en `@context`
 
 ## Arquitectura General
 
@@ -146,3 +233,34 @@ Las contribuciones son bienvenidas. Si deseas contribuir, por favor abre un issu
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT.
+
+## Migración Completada
+
+Se ha completado la migración de los componentes a la nueva estructura de Atomic Design. Los cambios principales son:
+
+1. **Estructura de Carpetas**:
+   - `atoms/`: Componentes básicos (Button, Loading, DebugInfo...)
+   - `molecules/`: Componentes compuestos (BookCard, Header, LogoutButton...)
+   - `organisms/`: Componentes complejos (BookList...)
+   - `features/`: Características completas (EpubReader...)
+
+2. **EpubReader Feature**:
+   - Ahora sigue un patrón bien organizado:
+     - `EpubReader/`
+       - `components/`: Componentes específicos
+         - `EpubReader.tsx`: Componente principal
+         - `EpubReaderDevices.tsx`: Implementación para dispositivos móviles
+         - `EpubReaderWeb/`: Implementación para web
+           - `EpubReaderWeb.tsx`: Componente principal
+           - `EpubReaderWebContainer.tsx`: Lógica
+           - `EpubReaderWebView.tsx`: Presentación
+           - `styles.ts`: Estilos
+           - `types.ts`: Interfaces y tipos
+       - `hooks/`: Hooks personalizados
+         - `useEpubReader.ts`: Lógica de carga y manejo del libro
+
+3. **Mejoras**:
+   - Uso consistente de `useTheme()` para acceder a colores, espaciado y tipografía
+   - Mejor separación de responsabilidades
+   - Props tipadas correctamente
+   - Patrón Container/Presentational aplicado donde corresponde
