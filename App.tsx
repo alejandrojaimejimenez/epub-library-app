@@ -7,52 +7,68 @@ import 'react-native-gesture-handler';
 import { LibraryProvider } from './src/shared/context/LibraryContext';
 import { AuthProvider } from './src/shared/context/AuthContext';
 import AuthNavigator from './src/presentation/navigation/AuthNavigator';
-import { RootStackParamList } from './src/presentation/navigation/AppNavigator';
+import AppNavigator, { RootStackParamList } from './src/presentation/navigation/AppNavigator';
 import { AuthStackParamList } from './src/presentation/navigation/AuthNavigator';
 
 // Habilitar las pantallas nativas para mejor rendimiento
 enableScreens();
 
 // Definir el tipo para todas las rutas posibles
-type AppRoutes = {
+export type AppRoutes = {
   Auth: AuthStackParamList;
   App: RootStackParamList;
 };
 
+// Definir tipos específicos para la configuración de linking
+type AppLinkingConfig = {
+  screens: {
+    Auth: {
+      screens: {
+        Login: string;
+        Register: string;
+      };
+    };
+    App: {
+      screens: {
+        TabNavigator: {
+          screens: {
+            Home: string;
+            Library: string;
+          };
+        };
+        BookDetail: string;
+        Reader: string;
+      };
+    };
+  };
+};
+
 // Configuración de enlace para rutas personalizadas
-const linking: LinkingOptions<RootStackParamList> = {
+const linking: LinkingOptions<AppRoutes> & { config: AppLinkingConfig } = {
   enabled: true,
-  prefixes: ['app://', 'http://localhost:19006'], // Añadimos el localhost para desarrollo
+  prefixes: ['epublibraryapp://', 'http://localhost:19006'],
   config: {
     screens: {
-      TabNavigator: {
-        path: '',
+      Auth: {
         screens: {
-          Home: '',
-          Library: 'library',
+          Login: 'login',
+          Register: 'register'
         }
       },
-      BookDetail: {
-        path: 'book/:bookId',
-        parse: {
-          bookId: (bookId: string) => String(bookId),
-        },
-      },
-      Reader: {
-        path: 'book/:bookId/read',
-        parse: {
-          bookId: (bookId: string) => String(bookId),
-        },
+      App: {
+        screens: {
+          TabNavigator: {
+            screens: {
+              Home: '',
+              Library: 'library'
+            }
+          },
+          BookDetail: 'book/:bookId',
+          Reader: 'book/:bookId/read'
+        }
       }
     }
-  },
-  // Añadimos listeners de depuración
-  subscribe(listener) {
-    console.log('Navegación - Suscrito a cambios de URL');
-    return () => {
-      console.log('Navegación - Desuscrito de cambios de URL');
-    };
-  },
+  }
 };
 
 const App: React.FC = () => {

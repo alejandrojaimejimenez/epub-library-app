@@ -21,33 +21,31 @@ const ReaderScreen: React.FC = () => {
   const navigation = useNavigation();
   const { updateLastReadPosition, getBookById } = useBooks();
   const { colors, spacing } = useTheme();
-  // El estado de carga se inicia como false porque la carga real se gestiona en EpubReader
-  const [loading, setLoading] = useState(route.params.bookId ? true : false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentCfi, setCurrentCfi] = useState<string | undefined>(undefined);
+  const [currentCfi, setCurrentCfi] = useState<string | undefined>(route.params.initialCfi);
   const [book, setBook] = useState<MBook | undefined>(route.params.book);
   
-  const { initialPosition, initialCfi, bookId } = route.params;  // Cargar el libro si se proporciona bookId
+  const { initialPosition, initialCfi, bookId } = route.params;
+
   useEffect(() => {
-    const loadBookData = async () => {
-      if (bookId && !book) {
-        try {
-          setLoading(true);
+    const loadBook = async () => {
+      try {
+        if (bookId && !book) {
           const loadedBook = await getBookById(bookId);
-          if (loadedBook) {
-            setBook(loadedBook);
-          } else {
-            setError('No se pudo cargar el libro');
+          if (!loadedBook) {
+            throw new Error('Libro no encontrado');
           }
-        } catch (err) {
-          setError(`Error al cargar el libro: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-        } finally {
-          setLoading(false);
+          setBook(loadedBook);
         }
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al cargar el libro');
+        setLoading(false);
       }
     };
 
-    loadBookData();
+    loadBook();
   }, [bookId, book, getBookById]);
   // Función para salir del lector
   const handleExit = useCallback(() => {
@@ -113,23 +111,27 @@ const ReaderScreen: React.FC = () => {
   //   }
   //   navigation.goBack();
   // }, [currentCfi, navigation, saveReadingPosition]);
-  if (loading) {
-    return <Loading text="Preparando el libro..." />;
-  }
-
   if (error) {
-    return (      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         <TouchableOpacity 
-          style={[styles.button, { backgroundColor: colors.primary }]} 
+          style={[styles.errorButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.goBack()}
-        >
-          <Text style={[styles.buttonText, { color: colors.textLight }]}>Volver atrás</Text>
+        >          <Text style={[styles.errorButtonText, { color: colors.text }]}>
+            Volver
+          </Text>
         </TouchableOpacity>
       </View>
     );
   }
-  return (    <View style={[styles.container, { backgroundColor: colors.background }]}>
+
+  if (loading || !book) {
+    return <Loading />;
+  }
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {book && (
         <EpubReader
           bookId={book.id.toString()}
@@ -144,27 +146,21 @@ const ReaderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  errorContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   errorText: {
-    textAlign: 'center',
     fontSize: 16,
     marginBottom: 20,
+    textAlign: 'center',
   },
-  button: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+  errorButton: {
+    padding: 10,
+    borderRadius: 5,
   },
-  buttonText: {
+  errorButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 
