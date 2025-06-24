@@ -7,14 +7,15 @@
 import EpubReaderWeb from './EpubReaderWeb';
 import EpubReaderWebContainer from './EpubReaderWebContainer';
 import EpubReaderWebView from './EpubReaderWebView';
-import { IEpubReaderWebProps, IEpubReaderState, EPUB_CONTAINER_ID } from './types';
+import type { IEpubReaderWebProps } from './types';
+import type { IEpubReaderState } from './types';
+import { EPUB_CONTAINER_ID } from './types';
 
-export {
+export type { IEpubReaderWebProps, IEpubReaderState };
+export { 
   EpubReaderWebContainer,
   EpubReaderWebView,
-  IEpubReaderWebProps,
-  IEpubReaderState,
-  EPUB_CONTAINER_ID
+  EPUB_CONTAINER_ID 
 };
 
 export default EpubReaderWeb;
