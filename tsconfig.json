@@ -2,7 +2,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "moduleResolution": "node",
     "noEmit": true,
     "skipLibCheck": true,
@@ -11,29 +14,90 @@
     "target": "esnext",
     "baseUrl": ".",
     "paths": {
-      "@assets/*": ["assets/*"],
-      "@application/*": ["src/application/*"],
-      "@services/*": ["src/application/services/*"],
-      "@usecases/*": ["src/application/usecases/*"],
-      "@domain/*": ["src/domain/*"],
-      "@interfaces/*": ["src/domain/interfaces/*"],
-      "@models/*": ["src/domain/models/*"],
-      "@repositories/*": ["src/domain/repositories/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@api/*": ["src/infrastructure/api/*"],
-      "@core/*": ["src/infrastructure/core/*"],
-      "@data/*": ["src/infrastructure/data/*"],
-      "@storage/*": ["src/infrastructure/storage/*"],
-      "@presentation/*": ["src/presentation/*"],
-      "@components/*": ["src/presentation/components/*"],
-      "@navigation/*": ["src/presentation/navigation/*"],
-      "@screens/*": ["src/presentation/screens/*"],
-      "@theme/*": ["src/presentation/theme/*"],
-      "@shared/*": ["src/shared/*"],
-      "@constants/*": ["src/shared/constants/*"],
-      "@context/*": ["src/shared/context/*"],
-      "@hooks/*": ["src/shared/hooks/*"],
-      "@utils/*": ["src/shared/utils/*"]
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@application/*": [
+        "src/application/*"
+      ],
+      "@services/*": [
+        "src/application/services/*"
+      ],
+      "@usecases/*": [
+        "src/application/usecases/*"
+      ],
+      "@domain/*": [
+        "src/domain/*"
+      ],
+      "@interfaces/*": [
+        "src/domain/interfaces/*"
+      ],
+      "@models/*": [
+        "src/domain/models/*"
+      ],
+      "@repositories/*": [
+        "src/domain/repositories/*"
+      ],
+      "@infrastructure/*": [
+        "src/infrastructure/*"
+      ],
+      "@api/*": [
+        "src/infrastructure/api/*"
+      ],
+      "@core/*": [
+        "src/infrastructure/core/*"
+      ],
+      "@data/*": [
+        "src/infrastructure/data/*"
+      ],
+      "@storage/*": [
+        "src/infrastructure/storage/*"
+      ],
+      "@presentation/*": [
+        "src/presentation/*"
+      ],
+      "@components/*": [
+        "src/presentation/components/*"
+      ],
+      "@atoms/*": [
+        "src/presentation/components/atoms/*"
+      ],
+      "@molecules/*": [
+        "src/presentation/components/molecules/*"
+      ],
+      "@organisms/*": [
+        "src/presentation/components/organisms/*"
+      ],
+      "@templates/*": [
+        "src/presentation/components/templates/*"
+      ],
+      "@features/*": [
+        "src/presentation/components/features/*"
+      ],
+      "@navigation/*": [
+        "src/presentation/navigation/*"
+      ],
+      "@screens/*": [
+        "src/presentation/screens/*"
+      ],
+      "@theme/*": [
+        "src/presentation/theme/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@constants/*": [
+        "src/shared/constants/*"
+      ],
+      "@context/*": [
+        "src/shared/context/*"
+      ],
+      "@hooks/*": [
+        "src/shared/hooks/*"
+      ],
+      "@utils/*": [
+        "src/shared/utils/*"
+      ]
     }
   },
   "exclude": [
@@ -42,5 +106,11 @@
     "metro.config.js",
     "jest.config.js"
   ],
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }

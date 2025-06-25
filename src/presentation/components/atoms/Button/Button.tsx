@@ -1,16 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from '@theme/useTheme';
-
-export interface IButtonProps {
-  title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
-  disabled?: boolean;
-  loading?: boolean;
-  fullWidth?: boolean;
-}
+import { IButtonProps } from './types';
 
 /**
  * Componente de botón reutilizable
@@ -23,18 +14,23 @@ const Button: React.FC<IButtonProps> = ({
   size = 'medium',
   disabled = false,
   loading = false,
-  fullWidth = false
+  fullWidth = false,
+  style,
+  accessibilityLabel,
+  accessibilityHint,
+  testID
 }) => {
   const { colors, spacing, borders } = useTheme();
 
   // Generar estilos según las propiedades
   const getContainerStyle = () => {
     const baseStyle = {
-      borderRadius: borders.radius.md,      alignItems: 'center' as const,
+      borderRadius: borders.radius.md,
+      alignItems: 'center' as const,
       justifyContent: 'center' as const,
       flexDirection: 'row' as const,
       opacity: disabled ? 0.6 : 1,
-      width: fullWidth ? '100%' as any : undefined,
+      width: fullWidth ? '100%' as const : undefined,
     };
 
     // Aplicar estilos según la variante
@@ -72,8 +68,8 @@ const Button: React.FC<IButtonProps> = ({
 
     return {
       ...baseStyle,
-      ...variantStyles[variant],
-      ...sizeStyles[size],
+      ...variantStyles[variant as keyof typeof variantStyles],
+      ...sizeStyles[size as keyof typeof sizeStyles],
     };
   };
 
@@ -112,17 +108,20 @@ const Button: React.FC<IButtonProps> = ({
 
     return {
       ...baseStyle,
-      ...variantStyles[variant],
-      ...sizeStyles[size],
+      ...variantStyles[variant as keyof typeof variantStyles],
+      ...sizeStyles[size as keyof typeof sizeStyles],
     };
   };
 
   return (
     <TouchableOpacity
-      style={getContainerStyle()}
+      style={[getContainerStyle(), style]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      testID={testID}
     >
       {loading ? (
         <ActivityIndicator 

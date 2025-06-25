@@ -1,11 +1,11 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { useAuth } from '@hooks/useAuth';
 import { useTheme } from '@theme/useTheme';
 import Button from '@components/atoms/Button';
 
 export interface ILogoutButtonProps {
-  style?: any;
+  style?: ViewStyle;
 }
 
 /**
@@ -20,11 +20,13 @@ const LogoutButton: React.FC<ILogoutButtonProps> = ({ style }) => {
     logout();
   };
 
-  return (    <Button 
+  return (
+    <Button 
       title="Cerrar Sesión"
       onPress={handleLogout}
       variant="primary"
       disabled={false}
+      style={style}
     />
   );
 };

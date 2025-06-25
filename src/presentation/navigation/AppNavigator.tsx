@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Screens
 import HomeScreen from '@screens/HomeScreen';
-import LibraryScreen from '@screens/LibraryScreen';
+import LibraryScreen from '@screens/LibraryScreen/LibraryScreen';
 import BookDetailScreen from '@screens/BookDetailScreen';
 import ReaderScreen from '@screens/ReaderScreen';
 

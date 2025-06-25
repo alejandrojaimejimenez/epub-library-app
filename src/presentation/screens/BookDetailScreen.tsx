@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Header from '@components/common/Header';
-import Button from '@components/common/Button';
-import Loading from '@components/common/Loading';
+import Header from '@components/molecules/Header';
+import Button from '@components/atoms/Button';
+import Loading from '@components/atoms/Loading';
 import { colors } from '@theme/colors';
 import { MBook } from '@models/Book';
 import useBooks from '@hooks/useBooks';
