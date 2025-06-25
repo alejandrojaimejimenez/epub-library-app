@@ -212,8 +212,30 @@ const SideMenu: React.FC<ISideMenuProps> = ({
             {menuItems.map(renderMenuItem)}
           </ScrollView>
 
-          {/* Logout Button */}
+          {/* Footer fijo: Ajustes y Logout */}
           <View style={styles.menuFooter}>
+            {/* Enlace a Ajustes */}
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() => {
+                onClose();
+                navigation.navigate('Settings');
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Ajustes"
+            >
+              <Text style={styles.menuItemIcon}>⚙️</Text>
+              <Text style={styles.settingsText}>Ajustes</Text>
+            </TouchableOpacity>
+            {/* Separador entre Ajustes y Logout */}
+            <View
+              style={{
+                borderTopWidth: 1,
+                borderTopColor: styles.menuItem?.borderBottomColor || '#e0e0e0',
+                marginVertical: 4,
+              }}
+            />
+            {/* Botón de Logout */}
             <TouchableOpacity
               style={styles.logoutItem}
               onPress={handleLogout}

@@ -132,5 +132,18 @@ export const createStyles = ({ colors, spacing, typography, menuWidth, position 
       color: colors.error,
       fontWeight: '600',
     },
+    settingsItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.sm,
+      borderRadius: spacing.xs,
+      marginBottom: spacing.xs,
+    },
+    settingsText: {
+      ...typography.body,
+      color: colors.text,
+      fontWeight: '500',
+    },
   });
 };

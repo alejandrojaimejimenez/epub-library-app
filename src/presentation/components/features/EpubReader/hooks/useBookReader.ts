@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { MBook } from '@models/Book';
 import { useTheme } from '@theme/useTheme';
+import { API_ENDPOINTS } from '@api/endpoints';
+import { BookRepository } from '@data/BookRepository';
 
 interface IUseBookReaderProps {
   bookId: string;
@@ -24,28 +26,11 @@ export const useBookReader = ({ bookId, initialPage = 1 }: IUseBookReaderProps) 
     const loadBook = async () => {
       try {
         setIsLoading(true);
-        // Aquí se cargaría el libro desde el repositorio o servicio correspondiente
-        // Ejemplo: const bookData = await bookService.getBookById(bookId);
-        
-        // Simulamos la carga con un timeout
-        setTimeout(() => {          setBook({
-            id: parseInt(bookId),
-            title: 'Libro de ejemplo',
-            sort: 'Libro de ejemplo',
-            timestamp: new Date().toISOString(),
-            author_sort: 'Autor de prueba',
-            path: `/books/${bookId}.epub`,
-            flags: 0,
-            uuid: `example-${bookId}`,
-            has_cover: 1,
-            last_modified: new Date().toISOString(),
-            authors: [{ id: 1, name: 'Autor de prueba', sort: 'Autor de prueba', link: '' }],
-            cover_path: 'default-cover.jpg',
-            lastReadCfi: currentCfi
-          });
-          setTotalPages(100);
-          setIsLoading(false);
-        }, 1000);
+        const repo = new BookRepository();
+        const bookData = await repo.getBookById(bookId);
+        setBook(bookData);
+        setCurrentCfi(bookData?.lastReadCfi || '');
+        setIsLoading(false);
       } catch (error) {
         console.error('Error al cargar el libro:', error);
         setIsLoading(false);

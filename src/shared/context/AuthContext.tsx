@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { MUser, MLoginCredentials, MRegisterData } from '@models/Auth';
 import { SAuth } from '@services/auth';
 import { AuthRepository } from '@data/AuthRepository';
-import { getAuthToken, setAuthToken, setUserData, getUserData, clearAuthData } from '@utils/authStorage';
+import { getAuthToken, setAuthToken, setUserData, getUserData, clearAuthData, clearAllUserStorage } from '@utils/authStorage';
 
 // Define el tipo para el contexto de autenticación
 export interface AuthContextType {
@@ -50,7 +50,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const storedToken = await getAuthToken();
         console.log('📝 Token almacenado:', storedToken ? 'Encontrado' : 'No encontrado');
-        
         if (storedToken) {
           console.log('🔑 Token válido, obteniendo datos de usuario');
           const userData = await getUserData();
@@ -60,16 +59,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.log('✅ Usuario autenticado correctamente');
         } else {
           console.log('❌ No hay token almacenado, usuario no autenticado');
+          await clearAllUserStorage(); // Limpia storage si no hay token
         }
       } catch (err) {
         console.error('❌ Error cargando datos de usuario:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar usuario');
+        await clearAllUserStorage(); // Limpia storage si hay error de autenticación
       } finally {
         console.log('🏁 Finalizada la carga de datos de usuario');
         setIsLoading(false);
       }
     };
-
     loadUser();
   }, []);
   // Función para iniciar sesión
@@ -78,11 +78,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const response = await authService.login(credentials);
-      // Comprobamos que la respuesta tiene la estructura esperada
       if (!response || !response.token || !response.user) {
         throw new Error('Respuesta de autenticación inválida');
       }
-      
       setToken(response.token);
       setUser(response.user);
       await setAuthToken(response.token);
@@ -90,6 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err) {
       console.error('Error de login:', err);
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+      await clearAllUserStorage(); // Limpia storage si hay error de autenticación
       throw err;
     } finally {
       setIsLoading(false);
@@ -101,11 +100,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const response = await authService.register(data);
-      // Comprobamos que la respuesta tiene la estructura esperada
       if (!response || !response.token || !response.user) {
         throw new Error('Respuesta de registro inválida');
       }
-      
       setToken(response.token);
       setUser(response.user);
       await setAuthToken(response.token);
@@ -113,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err) {
       console.error('Error de registro:', err);
       setError(err instanceof Error ? err.message : 'Error al registrarse');
+      await clearAllUserStorage(); // Limpia storage si hay error de autenticación
       throw err;
     } finally {
       setIsLoading(false);
@@ -122,12 +120,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await authService.logout(); // Ahora llamamos al método del servicio
-      await clearAuthData();
+      await authService.logout();
+      await clearAllUserStorage(); // Limpia storage al hacer logout
       setUser(null);
       setToken(null);
     } catch (err) {
       console.error('Error al cerrar sesión:', err);
+      await clearAllUserStorage(); // Limpia storage aunque falle logout
     } finally {
       setIsLoading(false);
     }

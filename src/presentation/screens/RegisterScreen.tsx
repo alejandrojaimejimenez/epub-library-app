@@ -4,6 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '@hooks/useAuth';
 import { AuthStackParamList } from '@navigation/AuthNavigator';
+import { useApiHealthcheck } from '@hooks/useApiHealthcheck';
+import { getApiBaseUrl, setApiBaseUrlCustom, API_BASE_URL, API_BASE_URL_CUSTOM } from '@constants/config';
+import { SUserLocalStorage } from '@storage/UserLocalStorage';
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -12,8 +15,25 @@ const RegisterScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [apiUrl, setApiUrl] = useState<string>(API_BASE_URL_CUSTOM || API_BASE_URL);
   const { register, isLoading, error, clearError } = useAuth();
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const { isValid, isLoading: isValidatingApi, error: apiError, validate } = useApiHealthcheck();
+
+  // Al montar, intenta cargar la url custom guardada
+  React.useEffect(() => {
+    SUserLocalStorage.get('api_url_custom').then((data) => {
+      if (data && data.url) setApiUrl(data.url);
+    });
+  }, []);
+
+  // Cuando se valida la API, guardar la url custom y actualizar config
+  const handleValidateApi = async () => {
+    // Guardar la url custom en storage y config antes de validar
+    setApiBaseUrlCustom(apiUrl);
+    await SUserLocalStorage.update({ id: 'api_url_custom', url: apiUrl });
+    await validate();
+  };
 
   const handleRegister = async () => {
     // Validaciones básicas
@@ -32,7 +52,13 @@ const RegisterScreen: React.FC = () => {
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Formato de email inválido');
       return;
-    }    try {
+    }
+
+    if (isValid !== true) {
+      Alert.alert('Error', 'Debes validar la URL de la API antes de registrarte.');
+      return;
+    }
+    try {
       console.log('Intentando registro con:', { username, email, password });
       await register({ username, email, password });
       Alert.alert('Éxito', 'Registro exitoso', [
@@ -105,10 +131,37 @@ const RegisterScreen: React.FC = () => {
             />
           </View>
           
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>URL de la API</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="http://localhost:3000"
+                value={apiUrl}
+                onChangeText={setApiUrl}
+                autoCapitalize="none"
+                keyboardType="url"
+              />
+              <TouchableOpacity
+                style={{ marginLeft: 8, backgroundColor: '#2E7D32', padding: 10, borderRadius: 5 }}
+                onPress={handleValidateApi}
+                disabled={isValidatingApi}
+              >
+                {isValidatingApi ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>Validar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+            {apiError && <Text style={styles.errorText}>{apiError}</Text>}
+            {isValid && <Text style={{ color: '#2E7D32' }}>API válida</Text>}
+          </View>
+          
           <TouchableOpacity
             style={styles.button}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={isLoading || isValid !== true}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />

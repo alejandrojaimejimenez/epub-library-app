@@ -64,3 +64,13 @@ export const clearAuthData = async (): Promise<void> => {
     removeUserData()
   ]);
 };
+
+// Añadir claves adicionales a limpiar
+export const clearAllUserStorage = async (): Promise<void> => {
+  const extraKeys = ['login', 'userToken'];
+  await Promise.all([
+    removeAuthToken(),
+    removeUserData(),
+    ...extraKeys.map(key => AsyncStorage.removeItem(key))
+  ]);
+};

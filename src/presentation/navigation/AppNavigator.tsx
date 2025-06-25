@@ -6,6 +6,7 @@ import HomeScreen from '@screens/HomeScreen';
 import LibraryScreen from '@screens/LibraryScreen/LibraryScreen';
 import BookDetailScreen from '@screens/BookDetailScreen';
 import ReaderScreen from '@screens/ReaderScreen';
+import SettingsScreen from '@screens/SettingsScreen';
 
 // Types
 import { MBook } from '@models/Book';
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Library: undefined;
   BookDetail: { bookId: string } | { book: MBook };
   Reader: { bookId: string; initialPosition?: number; initialCfi?: string } | { book: MBook; initialPosition?: number; initialCfi?: string };
+  Settings: undefined;
 };
 
 // Crea el navegador
@@ -47,6 +49,7 @@ const AppNavigator = () => {
           gestureEnabled: false,
         }} 
       />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 };
