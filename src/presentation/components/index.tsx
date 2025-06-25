@@ -12,5 +12,8 @@ export * from './molecules';
 // Organisms - Componentes más complejos que combinan moléculas y átomos
 export * from './organisms';
 
+// Templates - Estructuras de página completas
+export * from './templates';
+
 // Features - Características completas de la aplicación
 export * from './features';

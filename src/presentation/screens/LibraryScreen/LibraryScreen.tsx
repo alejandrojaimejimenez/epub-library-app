@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 // Components
 import BookCard from '@components/molecules/BookCard';
 import Loading from '@components/atoms/Loading';
-import ScreenWithHeader from '@components/templates/ScreenWithHeader';
+import { ScreenWithSideMenu } from '@components/templates';
 import SearchBar from '@components/molecules/SearchBar';
 import { ViewToggle } from '@components/molecules/ViewToggle';
 
@@ -100,12 +100,12 @@ const LibraryScreen: React.FC = () => {
   );
 
   return (
-    <ScreenWithHeader
+    <ScreenWithSideMenu
       title="Biblioteca"
       rightComponent={viewToggle}
     >
       {content}
-    </ScreenWithHeader>
+    </ScreenWithSideMenu>
   );
 };
 

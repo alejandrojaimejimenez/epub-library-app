@@ -16,7 +16,7 @@ export interface IHeaderProps {
 
   /**
    * Componente opcional para mostrar en la parte izquierda del header.
-   * Si se proporciona, tiene prioridad sobre showBackButton
+   * Si se proporciona, tiene prioridad sobre showBackButton y showHamburgerMenu
    */
   leftComponent?: ReactNode;
 
@@ -31,6 +31,18 @@ export interface IHeaderProps {
    * Requerido si showBackButton es true
    */
   onBackPress?: () => void;
+
+  /**
+   * Si es true, muestra el icono hamburger en la parte izquierda
+   * @default false
+   */
+  showHamburgerMenu?: boolean;
+
+  /**
+   * Función a ejecutar cuando se presiona el icono hamburger
+   * Requerido si showHamburgerMenu es true
+   */
+  onHamburgerPress?: () => void;
 
   /**
    * ID para pruebas

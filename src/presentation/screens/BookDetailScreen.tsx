@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Header from '@components/molecules/Header';
+import { ScreenWithSideMenu } from '@components/templates';
 import Button from '@components/atoms/Button';
 import Loading from '@components/atoms/Loading';
 import { colors } from '@theme/colors';
@@ -75,27 +75,19 @@ const BookDetailScreen: React.FC = () => {
     }
   };
 
-  const goBack = () => navigation.goBack();
-
   if (loading) {
     return <Loading />;
   }
 
   if (error || !book) {
     return (
-      <View style={styles.container}>
-        <Header 
-          title="Detalle del libro" 
-          leftComponent={
-            <TouchableOpacity onPress={goBack}>
-              <Text style={styles.backButton}>←</Text>
-            </TouchableOpacity>
-          }
-        />
+      <ScreenWithSideMenu
+        title="Detalle del libro"
+      >
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error || 'No se pudo cargar el libro'}</Text>
         </View>
-      </View>
+      </ScreenWithSideMenu>
     );
   }
 
@@ -104,16 +96,9 @@ const BookDetailScreen: React.FC = () => {
     : require('../../../assets/images/default-cover.jpg');
 
   return (
-    <View style={styles.container}>
-      <Header 
-        title={book.title} 
-        leftComponent={
-          <TouchableOpacity onPress={goBack}>
-            <Text style={styles.backButton}>←</Text>
-          </TouchableOpacity>
-        }
-      />
-      
+    <ScreenWithSideMenu
+      title={book.title}
+    >
       <ScrollView style={styles.scrollView}>
         <View style={styles.bookHeader}>
           <Image source={coverSource} style={styles.cover} resizeMode="contain" />
@@ -182,7 +167,7 @@ const BookDetailScreen: React.FC = () => {
           )}
         </View>
       </ScrollView>
-    </View>
+    </ScreenWithSideMenu>
   );
 };
 
@@ -292,10 +277,6 @@ const styles = StyleSheet.create({
     color: colors.error,
     textAlign: 'center',
     fontSize: 16,
-  },
-  backButton: {
-    fontSize: 24,
-    color: colors.textLight,
   },
 });
 

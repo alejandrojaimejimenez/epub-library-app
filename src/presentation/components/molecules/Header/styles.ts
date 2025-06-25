@@ -72,4 +72,8 @@ export const createStyles = ({ colors, layout, spacing, typography }: StylesThem
       color: colors.textLight,
       padding: spacing.xs,
     },
+    rightComponentWithMenu: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
   });

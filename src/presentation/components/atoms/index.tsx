@@ -8,6 +8,9 @@
 export { default as Button } from './Button';
 export type { IButtonProps } from './Button';
 
+export { HamburgerIcon } from './HamburgerIcon';
+export type { IHamburgerIconProps } from './HamburgerIcon';
+
 export { default as Loading } from './Loading';
 export { default as LoadingIndicator } from './LoadingIndicator';
 export { default as DebugInfo } from './DebugInfo';

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useNavigation } from '@react-navigation/native';
 import { BookList } from '@components/organisms';
 import Loading from '@components/atoms/Loading';
-import Header from '@components/molecules/Header';
+import { ScreenWithSideMenu } from '@components/templates';
 import LogoutButton from '@components/molecules/LogoutButton';
 import { colors } from '@theme/colors';
 import useBooks from '@hooks/useBooks';
@@ -76,17 +76,14 @@ const HomeScreen: React.FC = () => {
     );
   }
   return (
-    <View style={styles.container}>
-      <Header 
-        title="Mi Biblioteca de EPUB" 
-        rightComponent={
-          <TouchableOpacity onPress={navigateToLibrary}>
-            <Text style={styles.viewAllText}>Ver todo</Text>
-          </TouchableOpacity>
-        }
-        leftComponent={<LogoutButton style={styles.logoutButton} />}
-      />
-      
+    <ScreenWithSideMenu
+      title="Mi Biblioteca"
+      rightComponent={
+        <TouchableOpacity onPress={navigateToLibrary}>
+          <Text style={styles.viewAllText}>Ver todo</Text>
+        </TouchableOpacity>
+      }
+    >
       <ScrollView style={styles.scrollView}>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Bienvenido, {user?.username || 'Usuario'}</Text>
@@ -113,7 +110,7 @@ const HomeScreen: React.FC = () => {
         
         {/* Se podrían agregar más secciones aquí según las necesidades */}
       </ScrollView>
-    </View>
+    </ScreenWithSideMenu>
   );
 };
 

@@ -7,104 +7,55 @@
       "esnext"
     ],
     "moduleResolution": "node",
+    "isolatedModules": true,
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "strict": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "target": "esnext",
     "baseUrl": ".",
     "paths": {
-      "@assets/*": [
-        "assets/*"
-      ],
-      "@application/*": [
-        "src/application/*"
-      ],
-      "@services/*": [
-        "src/application/services/*"
-      ],
-      "@usecases/*": [
-        "src/application/usecases/*"
-      ],
-      "@domain/*": [
-        "src/domain/*"
-      ],
-      "@interfaces/*": [
-        "src/domain/interfaces/*"
-      ],
-      "@models/*": [
-        "src/domain/models/*"
-      ],
-      "@repositories/*": [
-        "src/domain/repositories/*"
-      ],
-      "@infrastructure/*": [
-        "src/infrastructure/*"
-      ],
-      "@api/*": [
-        "src/infrastructure/api/*"
-      ],
-      "@core/*": [
-        "src/infrastructure/core/*"
-      ],
-      "@data/*": [
-        "src/infrastructure/data/*"
-      ],
-      "@storage/*": [
-        "src/infrastructure/storage/*"
-      ],
-      "@presentation/*": [
-        "src/presentation/*"
-      ],
-      "@components/*": [
-        "src/presentation/components/*"
-      ],
-      "@atoms/*": [
-        "src/presentation/components/atoms/*"
-      ],
-      "@molecules/*": [
-        "src/presentation/components/molecules/*"
-      ],
-      "@organisms/*": [
-        "src/presentation/components/organisms/*"
-      ],
-      "@templates/*": [
-        "src/presentation/components/templates/*"
-      ],
-      "@features/*": [
-        "src/presentation/components/features/*"
-      ],
-      "@navigation/*": [
-        "src/presentation/navigation/*"
-      ],
-      "@screens/*": [
-        "src/presentation/screens/*"
-      ],
-      "@theme/*": [
-        "src/presentation/theme/*"
-      ],
-      "@shared/*": [
-        "src/shared/*"
-      ],
-      "@constants/*": [
-        "src/shared/constants/*"
-      ],
-      "@context/*": [
-        "src/shared/context/*"
-      ],
-      "@hooks/*": [
-        "src/shared/hooks/*"
-      ],
-      "@utils/*": [
-        "src/shared/utils/*"
-      ]
+      "@assets/*": ["assets/*"],
+      "@application/*": ["src/application/*"],
+      "@services/*": ["src/application/services/*"],
+      "@usecases/*": ["src/application/usecases/*"],
+      "@domain/*": ["src/domain/*"],
+      "@interfaces/*": ["src/domain/interfaces/*"],
+      "@models/*": ["src/domain/models/*"],
+      "@repositories/*": ["src/domain/repositories/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@api/*": ["src/infrastructure/api/*"],
+      "@core/*": ["src/infrastructure/core/*"],
+      "@data/*": ["src/infrastructure/data/*"],
+      "@storage/*": ["src/infrastructure/storage/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@components/*": ["src/presentation/components/*"],
+      "@atoms/*": ["src/presentation/components/atoms/*"],
+      "@molecules/*": ["src/presentation/components/molecules/*"],
+      "@organisms/*": ["src/presentation/components/organisms/*"],
+      "@templates/*": ["src/presentation/components/templates/*"],
+      "@features/*": ["src/presentation/components/features/*"],
+      "@navigation/*": ["src/presentation/navigation/*"],
+      "@screens/*": ["src/presentation/screens/*"],
+      "@theme/*": ["src/presentation/theme/*"],
+      "@shared/*": ["src/shared/*"],
+      "@constants/*": ["src/shared/constants/*"],
+      "@context/*": ["src/shared/context/*"],
+      "@hooks/*": ["src/shared/hooks/*"],
+      "@utils/*": ["src/shared/utils/*"]
     }
   },
   "exclude": [
     "node_modules",
     "babel.config.js",
     "metro.config.js",
-    "jest.config.js"
+    "jest.config.js",
+    "dist",
+    "build",
+    ".expo"
   ],
   "extends": "expo/tsconfig.base",
   "include": [

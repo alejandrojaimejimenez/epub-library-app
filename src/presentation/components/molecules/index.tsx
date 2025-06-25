@@ -7,6 +7,8 @@
 export { default as BookCard } from './BookCard';
 export { default as Header } from './Header';
 export { default as LogoutButton } from './LogoutButton';
+export { SideMenu } from './SideMenu';
+export type { ISideMenuProps, ISideMenuItem } from './SideMenu';
 
 // Aquí se agregarán otros componentes moleculares
 // export { default as MenuItem } from './MenuItem';

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@theme/useTheme';
+import { HamburgerIcon } from '@components/atoms';
 import { createStyles } from './styles';
 import type { IHeaderProps } from './types';
 
@@ -24,13 +25,16 @@ const Header: React.FC<IHeaderProps> = ({
   rightComponent, 
   leftComponent,
   showBackButton = false,
-  onBackPress
+  onBackPress,
+  showHamburgerMenu = false,
+  onHamburgerPress
 }) => {
     const { colors, layout, spacing, typography } = useTheme();
     const styles = createStyles({ colors, layout, spacing, typography });
 
   const renderLeftComponent = () => {
     if (leftComponent) return leftComponent;
+    
     if (showBackButton) {
       return (
         <TouchableOpacity 
@@ -42,7 +46,29 @@ const Header: React.FC<IHeaderProps> = ({
         </TouchableOpacity>
       );
     }
+    
     return null;
+  };
+
+  const renderRightComponent = () => {
+    if (rightComponent && !showHamburgerMenu) return rightComponent;
+    
+    if (showHamburgerMenu) {
+      return (
+        <View style={styles.rightComponentWithMenu}>
+          {rightComponent}
+          <View style={{ marginLeft: rightComponent ? spacing.sm : 0 }}>
+            <HamburgerIcon 
+              onPress={onHamburgerPress || (() => {})}
+              color={colors.textLight}
+              size={24}
+            />
+          </View>
+        </View>
+      );
+    }
+    
+    return rightComponent;
   };
 
   return (
@@ -60,7 +86,7 @@ const Header: React.FC<IHeaderProps> = ({
         </Text>
       </View>
       <View style={styles.rightComponent}>
-        {rightComponent}
+        {renderRightComponent()}
       </View>
     </View>
   );

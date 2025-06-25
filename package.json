@@ -10,6 +10,7 @@
     "eject": "expo eject",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
     "build": "expo build:web",
     "build:web": "expo export:web",
     "docker:build": "docker-compose build",
